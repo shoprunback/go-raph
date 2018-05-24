@@ -23,9 +23,9 @@ Graphs can store vertices, edges and multiedges. A multiedge is an edge that can
 ### Prototypes
 
 ```go
-func NewVertex(id string, props map[string]string) *Vertex
-func NewEdge(id, label, from, to string, props map[string]string) *Edge
-func NewMultiEdge(id, label string, froms, tos map[string]bool, props map[string]string) *Edge
+func NewVertex(id string, props map[string]string) *Vertex {}
+func NewEdge(id, label, from, to string, props map[string]string) *Edge {}
+func NewMultiEdge(id, label string, froms, tos map[string]bool, props map[string]string) *Edge {}
 ```
 
 When creating an `Edge`, you must reference its connected nodes by their id (from / to).

@@ -33,22 +33,22 @@ func NewEdge(id, label, from, to string, props map[string]string) *Edge {
 type Graph struct {
 	Vertices []string
 	Edges    []string
-	db       Storage
+	DB       Storage
 }
 
 func NewGraph() *Graph {
-	db := NewStorage()
-	return &Graph{[]string{}, []string{}, *db}
+	DB := NewStorage()
+	return &Graph{[]string{}, []string{}, *DB}
 }
 
 func (g *Graph) AddVertex(v *Vertex) {
 	g.Vertices = append(g.Vertices, v.ID)
-	g.db.SetProps(v.ID, v.Props)
+	g.DB.SetProps(v.ID, v.Props)
 }
 
 func (g *Graph) AddEdge(e *Edge) {
 	g.Edges = append(g.Edges, e.ID)
-	g.db.SetProps(e.ID, e.Props)
+	g.DB.SetProps(e.ID, e.Props)
 
 	// connect all "from" vertices to edge
 	for from := range e.Froms {
@@ -62,7 +62,7 @@ func (g *Graph) AddEdge(e *Edge) {
 }
 
 func (g *Graph) Connect(from, to, label string) {
-	g.db.Push(from, label, to)
+	g.DB.Push(from, label, to)
 }
 
 // retrieve neighbors of vertex
@@ -70,13 +70,13 @@ func (g Graph) GetNeighbors(vertex string, constraints Constraints) map[string]b
 	neighbors := map[string]bool{}
 
 	// retrieve outgoing edges with label
-	edges := g.db.Pull(vertex, constraints.EdgeLabel)
+	edges := g.DB.Pull(vertex, constraints.EdgeLabel)
 
 	for _, edge := range edges {
 		// assert that edge satifies constraints
 		if g.Satisfies(edge, constraints.EdgeProps) {
 			// retrieve edge ends
-			vertices := g.db.Pull(edge, constraints.EdgeLabel)
+			vertices := g.DB.Pull(edge, constraints.EdgeLabel)
 
 			for _, neighbor := range vertices {
 				// assert that vertex satifies constraints
@@ -97,16 +97,16 @@ func (g Graph) GetNeighborsWithEdgesAndWeights(vertex, weightProp string, constr
 	weights := map[string]int{}
 
 	// retrieve outgoing edges with label
-	edges := g.db.Pull(vertex, constraints.EdgeLabel)
+	edges := g.DB.Pull(vertex, constraints.EdgeLabel)
 
 	for _, edge := range edges {
 		// assert that edge satifies constraints
 		if g.Satisfies(edge, constraints.EdgeProps) {
 			// retrieve weight of edge
-			if weightString, ok := g.db.GetProp(edge, weightProp); ok {
+			if weightString, ok := g.DB.GetProp(edge, weightProp); ok {
 				// the weight exists
 				weight, _ := strconv.Atoi(weightString)
-				vertices := g.db.Pull(edge, constraints.EdgeLabel)
+				vertices := g.DB.Pull(edge, constraints.EdgeLabel)
 
 				for _, neighbor := range vertices {
 					// assert that vertex satifies constraints
@@ -159,7 +159,7 @@ func (g Graph) getAccessibleVerticesRecursive(vertex string, constraints Constra
 func (g Graph) Satisfies(id string, props map[string][]string) bool {
 	for prop, satisfyingValues := range props {
 		// retrieve property value of id element
-		propString, ok := g.db.GetProp(id, prop)
+		propString, ok := g.DB.GetProp(id, prop)
 
 		// if property does not exist
 		if !ok {
