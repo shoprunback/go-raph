@@ -45,7 +45,7 @@ Costs are integer values. They can be added to vertices and edges.
 
 They can be used during shortest path computation:
 - as the value to minimize
-- to filter objects during shortest path computation
+- to filter vertices and edges
 
 ```go
 A := raph.NewEdge("US Route 66", "route", "Chicago", "Santa Monica")
