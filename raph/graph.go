@@ -1,8 +1,8 @@
 package raph
 
 type Graph struct {
-	Vertices map[string]*Vertex
-	Edges    map[string]*Edge
+	Vertices    map[string]*Vertex
+	Edges       map[string]*Edge
 	Connections map[string][]string
 }
 
@@ -25,11 +25,11 @@ func (g *Graph) AddEdge(e *Edge) {
 }
 
 func (g *Graph) Connect(from, to, label string) {
-	key := from+":"+label
+	key := from + ":" + label
 	g.Connections[key] = append(g.Connections[key], to)
 }
 
-func (g *Graph) GetConnections(id, label string) ([]string) {
+func (g *Graph) GetConnections(id, label string) []string {
 	return g.Connections[id+":"+label]
 }
 

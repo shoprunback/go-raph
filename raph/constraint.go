@@ -1,10 +1,10 @@
 package raph
 
 type Constraint struct {
-	Label string
+	Label       string
 	EdgeProps   map[string][]string
 	VertexProps map[string][]string
-	MinCosts   map[string]int
+	MinCosts    map[string]int
 }
 
 func NewConstraint(label string) *Constraint {
