@@ -30,8 +30,8 @@ func (g *Graph) GetConnections(id, label string) ([]string) {
 }
 
 // retrieve neighbors of vertex
-func (g Graph) GetNeighbors(vertex string, constraint Constraint) []string {
-	neighbors := []string{}
+func (g Graph) GetNeighbors(vertex string, constraint Constraint) map[string]bool {
+	neighbors := map[string]bool{}
 
 	// retrieve outgoing edges with label
 	edges := g.GetConnections(vertex, constraint.Label)
@@ -47,7 +47,7 @@ func (g Graph) GetNeighbors(vertex string, constraint Constraint) []string {
 				// assert that vertex satifies constraint
 				if g.Vertices[neighbor].Satisfies(constraint) {
 					// add vertex to neighbors
-					neighbors = append(neighbors, neighbor)
+					neighbors[neighbor] = true
 				}
 			}
 		}
@@ -73,7 +73,11 @@ func (g Graph) GetNeighborsWithCosts(vertex, cost string, constraint Constraint)
 				// assert that vertex satifies constraint
 				if neighbor.Satisfies(constraint) {
 					// append cost of vertex
-					weights[neighbor.ID] = edge.Costs[cost] + neighbor.Costs[cost]
+					potentialCost := edge.Costs[cost] + neighbor.Costs[cost]
+					actualCost, ok := weights[neighbor.ID]
+					if !ok || potentialCost < actualCost {
+						weights[neighbor.ID] = potentialCost
+					}
 				}
 			}
 		}
@@ -88,7 +92,7 @@ func (g Graph) GetAccessibleVertices(vertex string, constraint Constraint) map[s
 
 	// only vertex is accessible at the beginning
 	accessibleVertices := map[string]bool{vertex: true}
-	for _, neighbor := range neighbors {
+	for neighbor := range neighbors {
 		// pass accessible vertices map to be updated
 		g.getAccessibleVerticesRecursive(neighbor, constraint, accessibleVertices)
 	}
@@ -105,7 +109,7 @@ func (g Graph) getAccessibleVerticesRecursive(vertex string, constraint Constrai
 	neighbors := g.GetNeighbors(vertex, constraint)
 
 	// recursive call on all neighbors if not done yet
-	for _, neighbor := range neighbors {
+	for neighbor := range neighbors {
 		if _, ok := accessibleVertices[neighbor]; !ok {
 			g.getAccessibleVerticesRecursive(neighbor, constraint, accessibleVertices)
 		}
