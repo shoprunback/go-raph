@@ -16,8 +16,12 @@ func (g *Graph) AddVertex(v *Vertex) {
 
 func (g *Graph) AddEdge(e *Edge) {
 	g.Edges[e.ID] = e
-	g.Connect(e.From, e.ID, e.Label)
-	g.Connect(e.ID, e.To, e.Label)
+	for from := range e.Froms {
+		g.Connect(from, e.ID, e.Label)
+	}
+	for to := range e.Tos {
+		g.Connect(e.ID, to, e.Label)
+	}
 }
 
 func (g *Graph) Connect(from, to, label string) {

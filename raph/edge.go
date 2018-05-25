@@ -5,12 +5,18 @@ type Edge struct {
     Props map[string][]string
     Costs map[string]int
     Label string
-    From string
-    To   string
+    Froms map[string]bool
+    Tos   map[string]bool
 }
 
 func NewEdge(id, label, from, to string) *Edge {
-    return &Edge{id, map[string][]string{}, map[string]int{}, label, from, to}
+    froms := map[string]bool{from: true}
+    tos := map[string]bool{to: true}
+    return &Edge{id, map[string][]string{}, map[string]int{}, label, froms, tos}
+}
+
+func NewMultiEdge(id, label string, froms, tos map[string]bool) *Edge {
+    return &Edge{id, map[string][]string{}, map[string]int{}, label, froms, tos}
 }
 
 func (e *Edge) AddProp(prop, value string) {
