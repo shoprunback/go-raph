@@ -16,35 +16,70 @@ To initialize a graph, you can use the built-in **_NewGraph()_** function.
 g := raph.NewGraph()
 ```
 
-### Create edges & vertices
+### Vertices and Edges
 
-Graphs can store vertices, edges and multiedges. A multiedge is an edge that can have multiple origins and destinations. It is useful when you have edges that share the same properties, and more efficient for traversal queries.
-
-### Prototypes
+#### Prototypes
 
 ```go
-func NewVertex(id string, props map[string]string) *Vertex {}
-func NewEdge(id, label, from, to string, props map[string]string) *Edge {}
-func NewMultiEdge(id, label string, froms, tos map[string]bool, props map[string]string) *Edge {}
+func NewVertex(id string) *Vertex {}
+func NewEdge(id, label, from, to string) *Edge {}
 ```
 
-When creating an `Edge`, you must reference its connected nodes by their id (from / to).
+When creating an `Edge`, you must reference its connected nodes (from / to) by their id.
+
+#### Properties
+
+Properties are sets of strings. They can be added to vertices and edges.
+
+```go
+A := raph.NewVertex("Quentin")
+A.AddProp("job", "student")
+A.AddProp("job", "intern")
+fmt.Println(A.Props["job"])
+// => [student intern]
+```
+
+#### Costs
+
+Costs are integer values. They can be added to vertices and edges.
+
+They can be used during shortest path computation:
+- as the value to minimize
+- to filter objects during shortest path computation
+
+```go
+A := raph.NewEdge("US Route 66", "route", "Chicago", "Santa Monica")
+A.SetCost("length", 3940)
+fmt.Println(A.Costs["length"])
+// => 3940
+```
 
 ### Populate
 
 You can add vertices and edges to a `Graph` instance.
 
 ```go
+// create graph
+g := raph.NewGraph()
+
 // create vertices
-noProps := map[string]string{}
-A := raph.NewVertex("Paris", noProps)
-B := raph.NewVertex("Amsterdam", noProps)
-C := raph.NewVertex("Beijing", noProps)
+A := raph.NewVertex("Paris")
+B := raph.NewVertex("Amsterdam")
+C := raph.NewVertex("Beijing")
 
 // create edges
-D := raph.NewEdge("P->B", "flight", "Paris", "Beijing", map[string]string{"price": "500", "time": "11", "maxLuggageSize": "S"})
-E := raph.NewEdge("P->A", "flight", "Paris", "Amsterdam", map[string]string{"price": "100", "time": "5", "maxLuggageSize": "L"})
-F := raph.NewEdge("A->B", "flight", "Amsterdam", "Beijing", map[string]string{"price": "300", "time": "10", "maxLuggageSize": "L"})
+D := raph.NewEdge("P->B", "flight", "Paris", "Beijing")
+D.AddProp("maxLuggageSize", "S")
+D.SetCost("price", 500)
+D.SetCost("time", 11)
+E := raph.NewEdge("P->A", "flight", "Paris", "Amsterdam")
+E.AddProp("maxLuggageSize", "L")
+E.SetCost("price", 100)
+E.SetCost("time", 5)
+F := raph.NewEdge("A->B", "flight", "Amsterdam", "Beijing")
+F.AddProp("maxLuggageSize", "L")
+F.SetCost("price", 300)
+F.SetCost("time", 10)
 
 // populate graph
 g.AddVertex(A)
@@ -59,44 +94,49 @@ g.AddEdge(F)
 
 You can compute shortest paths with a `Dijkstra` instance. If no path exists, `cost` will be `-1`.
 
-`Constraints` object lets you customize path traversal to your needs. Simply use *_AddNodeConstraint(prop, value string)_* & *_AddEdgeConstraint(prop, value string)_* to filter out nodes & edges.
+`Constraint` objects let you customize path traversals to your needs.
+
+To filter out nodes and edges, simply use:
+- `AddVertexConstraint(prop, value string)`
+- `AddEdgeConstraint(prop, value string)`
+- `SetMinCostConstraint(prop string, value int)` (will filter edges & vertices)
 
 ```go
 // init dijkstra
 d := raph.NewDijkstra(*g)
 
-var constraints *raph.Constraints
+var constraint *raph.Constraint
 var path []string
 var cost int
 
 // find shortest path between Paris and Beijing, minimizing time
-constraints = raph.NewConstraints("flight")
-path, cost = d.ShortestPath("Paris", "Beijing", "time", *constraints)
+constraint = raph.NewConstraint("flight")
+path, cost = d.ShortestPath("Paris", "Beijing", "time", *constraint)
 fmt.Println(path, cost)
-// => [Paris P->B Beijing] 11
+// => [Paris Beijing] 11
 
 // find shortest path between Paris and Beijing, minimizing price
-constraints = raph.NewConstraints("flight")
-path, cost = d.ShortestPath("Paris", "Beijing", "price", *constraints)
+constraint = raph.NewConstraint("flight")
+path, cost = d.ShortestPath("Paris", "Beijing", "price", *constraint)
 fmt.Println(path, cost)
-// => [Paris P->A Amsterdam A->B Beijing] 400
+// => [Paris Amsterdam Beijing] 400
 
 // find shortest path between Paris and Beijing accepting M or L luggages, minimizing time
-constraints = raph.NewConstraints("flight")
-constraints.AddEdgeConstraint("maxLuggageSize", "M")
-constraints.AddEdgeConstraint("maxLuggageSize", "L")
-path, cost = d.ShortestPath("Paris", "Beijing", "time", *constraints)
+constraint = raph.NewConstraint("flight")
+constraint.AddEdgeConstraint("maxLuggageSize", "M")
+constraint.AddEdgeConstraint("maxLuggageSize", "L")
+path, cost = d.ShortestPath("Paris", "Beijing", "time", *constraint)
 fmt.Println(path, cost)
-// => [Paris P->A Amsterdam A->B Beijing] 15
+// => [Paris Amsterdam Beijing] 15
 
 // find shortest path between Paris and Beijing, avoiding flights shorter than 10 hours, minimizing price
-constraints = raph.NewConstraints("flight")
-constraints.AddEdgeConstraint("time", "10")
-path, cost = d.ShortestPath("Paris", "Beijing", "price", *constraints)
+constraint = raph.NewConstraint("flight")
+constraint.SetMinCostConstraint("time", 10)
+path, cost = d.ShortestPath("Paris", "Beijing", "price", *constraint)
 fmt.Println(path, cost)
-// => [Paris P->B Beijing] 500
+// => [Paris Beijing] 500
 ```
 
 ### Custom shortest path
 
-You can implement your own `ShortestPath` algorithm would you need further customization. To do so, you need to declare a new _struct_ overriding the **_ShortestPath()_** method. This [working example](example/mydijkstra/main.go) can help you.
+You can implement your own `ShortestPath` algorithm would you need further customization. To do so, you need to declare a new _struct_ overriding the original **_ShortestPath()_** method. This [working example](example/mydijkstra/main.go) can help you.
