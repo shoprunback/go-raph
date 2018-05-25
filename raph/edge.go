@@ -23,6 +23,14 @@ func (e *Edge) AddProp(prop, value string) {
 	e.Props[prop] = append(e.Props[prop], value)
 }
 
+func (e *Edge) AddProps(props map[string][]string) {
+	for prop, values := range props {
+		for _, value := range values {
+			e.AddProp(prop, value)
+		}
+	}
+}
+
 func (e *Edge) SetCost(cost string, value int) {
 	e.Costs[cost] = value
 }

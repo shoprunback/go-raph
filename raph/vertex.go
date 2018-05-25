@@ -14,6 +14,14 @@ func (v *Vertex) AddProp(prop, value string) {
 	v.Props[prop] = append(v.Props[prop], value)
 }
 
+func (v *Vertex) AddProps(props map[string][]string) {
+	for prop, values := range props {
+		for _, value := range values {
+			v.AddProp(prop, value)
+		}
+	}
+}
+
 func (v *Vertex) SetCost(cost string, value int) {
 	v.Costs[cost] = value
 }
