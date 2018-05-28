@@ -77,9 +77,10 @@ func (d *Dijkstra) ShortestPath(from, to, minimize string, constraint Constraint
 	d.Costs[from] = 0
 
 	// run dijkstra until queue is empty
+	costsToMinimize := []string{minimize}
 	for len(d.Q) > 0 {
 		s1 := d.PickVertexFromQ()
-		neighbors, edges := d.G.GetNeighborsWithCostsAndEdges(s1, minimize, constraint)
+		neighbors, edges := d.G.GetNeighborsWithCostsAndEdges(s1, costsToMinimize, constraint)
 		for s2, cost := range neighbors {
 			edge := edges[s2]
 			d.UpdateDistances(s1, s2, edge, cost)

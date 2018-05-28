@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/shoprunback/go-raph/raph"
+	"go-raph/raph"
 )
 
 func main() {
@@ -58,15 +58,15 @@ func main() {
 
 	// find shortest path between Paris and Beijing accepting M or L luggages, minimizing time
 	constraint = raph.NewConstraint("flight")
-	constraint.AddEdgeConstraint("maxLuggageSize", "M")
-	constraint.AddEdgeConstraint("maxLuggageSize", "L")
+	constraint.AddProp("maxLuggageSize", "M")
+	constraint.AddProp("maxLuggageSize", "L")
 	path, cost = d.ShortestPath("Paris", "Beijing", "time", *constraint)
 	fmt.Println(path, cost)
 	// => [Paris Amsterdam Beijing] 15
 
 	// find shortest path between Paris and Beijing, avoiding flights shorter than 10 hours, minimizing price
 	constraint = raph.NewConstraint("flight")
-	constraint.SetMinCostConstraint("time", 10)
+	constraint.SetCost("time", 10)
 	path, cost = d.ShortestPath("Paris", "Beijing", "price", *constraint)
 	fmt.Println(path, cost)
 	// => [Paris Beijing] 500

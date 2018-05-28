@@ -2,41 +2,31 @@ package raph
 
 type Constraint struct {
 	Label       string
-	EdgeProps   map[string][]string
-	VertexProps map[string][]string
-	MinCosts    map[string]int
+	Props       map[string][]string
+	Costs       map[string]int
 }
 
 func NewConstraint(label string) *Constraint {
-	return &Constraint{label, map[string][]string{}, map[string][]string{}, map[string]int{}}
+	return &Constraint{label, map[string][]string{}, map[string]int{}}
 }
 
-func (c *Constraint) AddVertexConstraint(prop, value string) {
-	c.VertexProps[prop] = append(c.VertexProps[prop], value)
+func (c *Constraint) AddProp(prop, value string) {
+	c.Props[prop] = append(c.Props[prop], value)
 }
 
-func (c *Constraint) AddEdgeConstraint(prop, value string) {
-	c.EdgeProps[prop] = append(c.EdgeProps[prop], value)
-}
-
-func (c *Constraint) SetMinCostConstraint(prop string, value int) {
-	c.MinCosts[prop] = value
+func (c *Constraint) SetCost(prop string, value int) {
+	c.Costs[prop] = value
 }
 
 func (c Constraint) Copy() *Constraint {
-	constraintCopy := NewConstraint(c.Label)
-	for prop, values := range c.VertexProps {
+	constraint := NewConstraint(c.Label)
+	for prop, values := range c.Props {
 		for _, value := range values {
-			constraintCopy.AddVertexConstraint(prop, value)
+			constraint.AddProp(prop, value)
 		}
 	}
-	for prop, values := range c.EdgeProps {
-		for _, value := range values {
-			constraintCopy.AddEdgeConstraint(prop, value)
-		}
+	for cost, value := range c.Costs {
+		constraint.SetCost(cost, value)
 	}
-	for prop, value := range c.MinCosts {
-		constraintCopy.SetMinCostConstraint(prop, value)
-	}
-	return constraintCopy
+	return constraint
 }

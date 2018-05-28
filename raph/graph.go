@@ -24,13 +24,13 @@ func (g *Graph) AddEdge(e *Edge) {
 	}
 }
 
+func (g *Graph) GetConnections(id, label string) []string {
+	return g.Connections[id+":"+label]
+}
+
 func (g *Graph) Connect(from, to, label string) {
 	key := from + ":" + label
 	g.Connections[key] = append(g.Connections[key], to)
-}
-
-func (g *Graph) GetConnections(id, label string) []string {
-	return g.Connections[id+":"+label]
 }
 
 // retrieve neighbors of vertex
@@ -47,6 +47,7 @@ func (g Graph) GetNeighbors(vertex string, constraint Constraint) map[string]boo
 		if edge.Satisfies(constraint) {
 			// retrieve edge ends
 			vertices := g.GetConnections(edge.ID, constraint.Label)
+
 			for _, neighbor := range vertices {
 				// assert that vertex satifies constraint
 				if g.Vertices[neighbor].Satisfies(constraint) {
@@ -61,7 +62,7 @@ func (g Graph) GetNeighbors(vertex string, constraint Constraint) map[string]boo
 }
 
 // retrieve neighbors & costs of vertex under constraint
-func (g Graph) GetNeighborsWithCostsAndEdges(vertex, cost string, constraint Constraint) (map[string]int, map[string]string) {
+func (g Graph) GetNeighborsWithCostsAndEdges(vertex string, costs []string, constraint Constraint) (map[string]int, map[string]string) {
 	weights := map[string]int{}
 	crossedEdges := map[string]string{}
 
@@ -73,13 +74,19 @@ func (g Graph) GetNeighborsWithCostsAndEdges(vertex, cost string, constraint Con
 		// assert that edge satifies constraint
 		if edge.Satisfies(constraint) {
 			vertices := g.GetConnections(edge.ID, constraint.Label)
+
 			for _, n := range vertices {
 				neighbor := g.Vertices[n]
+
 				// assert that vertex satifies constraint
 				if neighbor.Satisfies(constraint) {
-					// append cost of vertex
-					potentialCost := edge.Costs[cost] + neighbor.Costs[cost]
+					// compute potential cost of crossing vertex+edge
+					potentialCost := 0
+					for _, cost := range costs {
+						potentialCost = potentialCost + edge.Costs[cost] + neighbor.Costs[cost]
+					}
 					actualCost, ok := weights[neighbor.ID]
+
 					if !ok || potentialCost < actualCost {
 						weights[neighbor.ID] = potentialCost
 						crossedEdges[neighbor.ID] = edge.ID

@@ -18,14 +18,17 @@ g := raph.NewGraph()
 
 ### Vertices and Edges
 
+Graphs can store vertices, edges and multiedges.
+
+A multiedge is an edge that can have multiple origins and destinations. It is useful when you have edges that share the same properties, and more efficient for traversal queries. When creating an `Edge`, you must reference its connected nodes (from / to) by their id.
+
 #### Prototypes
 
 ```go
 func NewVertex(id string) *Vertex {}
 func NewEdge(id, label, from, to string) *Edge {}
+func NewMultiEdge(id, label string, froms, tos map[string]bool) *Edge {}
 ```
-
-When creating an `Edge`, you must reference its connected nodes (from / to) by their id.
 
 #### Properties
 
@@ -41,9 +44,9 @@ fmt.Println(A.Props["job"])
 
 #### Costs
 
-Costs are integer values. They can be added to vertices and edges.
+Costs are integer values. They can be set on vertices and edges.
 
-They can be used during shortest path computation:
+They are used during shortest path computation:
 - as the value to minimize
 - to filter vertices and edges
 
@@ -94,12 +97,11 @@ g.AddEdge(F)
 
 You can compute shortest paths with a `Dijkstra` instance. If no path exists, `cost` will be `-1`.
 
-`Constraint` objects let you customize path traversals to your needs.
+`Constraint` objects let you customize path traversals to fit your needs.
 
 To filter out nodes and edges, simply use:
-- `AddVertexConstraint(prop, value string)`
-- `AddEdgeConstraint(prop, value string)`
-- `SetMinCostConstraint(prop string, value int)` (will filter edges & vertices)
+- `Constraint.AddProp(prop, value string)` can be called multiple times to add a list of values. The node/edge will be filtered out if the prop array of the node/edge does not contain at least one of the values of the contraints. If the prop array is empty, it will not be filtered out.
+- `Constraint.SetCost(prop string, value int)` acts like a threshold: will dodge the node/edge if the property value is less than specified value. If the cost of the node is not defined, it will not be filtered out.
 
 ```go
 // init dijkstra
@@ -123,15 +125,15 @@ fmt.Println(path, cost)
 
 // find shortest path between Paris and Beijing accepting M or L luggages, minimizing time
 constraint = raph.NewConstraint("flight")
-constraint.AddEdgeConstraint("maxLuggageSize", "M")
-constraint.AddEdgeConstraint("maxLuggageSize", "L")
+constraint.AddProp("maxLuggageSize", "M")
+constraint.AddProp("maxLuggageSize", "L")
 path, cost = d.ShortestPath("Paris", "Beijing", "time", *constraint)
 fmt.Println(path, cost)
 // => [Paris Amsterdam Beijing] 15
 
 // find shortest path between Paris and Beijing, avoiding flights shorter than 10 hours, minimizing price
 constraint = raph.NewConstraint("flight")
-constraint.SetMinCostConstraint("time", 10)
+constraint.SetCost("time", 10)
 path, cost = d.ShortestPath("Paris", "Beijing", "price", *constraint)
 fmt.Println(path, cost)
 // => [Paris Beijing] 500
