@@ -113,13 +113,13 @@ var cost int
 
 // find shortest path between Paris and Beijing, minimizing time
 constraint = raph.NewConstraint("flight")
-path, cost = d.ShortestPath("Paris", "Beijing", "time", *constraint)
+path, cost = d.ShortestPath("Paris", "Beijing", *constraint, "time")
 fmt.Println(path, cost)
 // => [Paris Beijing] 11
 
 // find shortest path between Paris and Beijing, minimizing price
 constraint = raph.NewConstraint("flight")
-path, cost = d.ShortestPath("Paris", "Beijing", "price", *constraint)
+path, cost = d.ShortestPath("Paris", "Beijing", *constraint, "price")
 fmt.Println(path, cost)
 // => [Paris Amsterdam Beijing] 400
 
@@ -127,17 +127,19 @@ fmt.Println(path, cost)
 constraint = raph.NewConstraint("flight")
 constraint.AddProp("maxLuggageSize", "M")
 constraint.AddProp("maxLuggageSize", "L")
-path, cost = d.ShortestPath("Paris", "Beijing", "time", *constraint)
+path, cost = d.ShortestPath("Paris", "Beijing", *constraint, "time")
 fmt.Println(path, cost)
 // => [Paris Amsterdam Beijing] 15
 
 // find shortest path between Paris and Beijing, avoiding flights shorter than 10 hours, minimizing price
 constraint = raph.NewConstraint("flight")
 constraint.SetCost("time", 10)
-path, cost = d.ShortestPath("Paris", "Beijing", "price", *constraint)
+path, cost = d.ShortestPath("Paris", "Beijing", *constraint, "price")
 fmt.Println(path, cost)
 // => [Paris Beijing] 500
 ```
+
+`Tip` You can minimize over more than one cost by giving a list of costs at the end of **_ShortestPath()_** method. For instance, if you want to minimize **_2 x time + price_**, call `d.ShortestPath("Paris", "Beijing", *constraint, "time", "time", "price")`.
 
 ### Custom shortest path
 

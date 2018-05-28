@@ -46,13 +46,13 @@ func main() {
 
 	// find shortest path between Paris and Beijing, minimizing time
 	constraint = raph.NewConstraint("flight")
-	path, cost = d.ShortestPath("Paris", "Beijing", "time", *constraint)
+	path, cost = d.ShortestPath("Paris", "Beijing", *constraint, "time")
 	fmt.Println(path, cost)
 	// => [Paris Beijing] 11
 
 	// find shortest path between Paris and Beijing, minimizing price
 	constraint = raph.NewConstraint("flight")
-	path, cost = d.ShortestPath("Paris", "Beijing", "price", *constraint)
+	path, cost = d.ShortestPath("Paris", "Beijing", *constraint, "price")
 	fmt.Println(path, cost)
 	// => [Paris Amsterdam Beijing] 400
 
@@ -60,14 +60,14 @@ func main() {
 	constraint = raph.NewConstraint("flight")
 	constraint.AddProp("maxLuggageSize", "M")
 	constraint.AddProp("maxLuggageSize", "L")
-	path, cost = d.ShortestPath("Paris", "Beijing", "time", *constraint)
+	path, cost = d.ShortestPath("Paris", "Beijing", *constraint, "time")
 	fmt.Println(path, cost)
 	// => [Paris Amsterdam Beijing] 15
 
 	// find shortest path between Paris and Beijing, avoiding flights shorter than 10 hours, minimizing price
 	constraint = raph.NewConstraint("flight")
 	constraint.SetCost("time", 10)
-	path, cost = d.ShortestPath("Paris", "Beijing", "price", *constraint)
+	path, cost = d.ShortestPath("Paris", "Beijing", *constraint, "price")
 	fmt.Println(path, cost)
 	// => [Paris Beijing] 500
 }
