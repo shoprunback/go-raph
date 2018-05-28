@@ -47,7 +47,6 @@ func (g Graph) GetNeighbors(vertex string, constraint Constraint) map[string]boo
 		if edge.Satisfies(constraint) {
 			// retrieve edge ends
 			vertices := g.GetConnections(edge.ID, constraint.Label)
-
 			for _, neighbor := range vertices {
 				// assert that vertex satifies constraint
 				if g.Vertices[neighbor].Satisfies(constraint) {
@@ -62,8 +61,9 @@ func (g Graph) GetNeighbors(vertex string, constraint Constraint) map[string]boo
 }
 
 // retrieve neighbors & costs of vertex under constraint
-func (g Graph) GetNeighborsWithCosts(vertex, cost string, constraint Constraint) map[string]int {
+func (g Graph) GetNeighborsWithCostsAndEdges(vertex, cost string, constraint Constraint) (map[string]int, map[string]string) {
 	weights := map[string]int{}
+	crossedEdges := map[string]string{}
 
 	// retrieve outgoing edges with label
 	edges := g.GetConnections(vertex, constraint.Label)
@@ -82,12 +82,13 @@ func (g Graph) GetNeighborsWithCosts(vertex, cost string, constraint Constraint)
 					actualCost, ok := weights[neighbor.ID]
 					if !ok || potentialCost < actualCost {
 						weights[neighbor.ID] = potentialCost
+						crossedEdges[neighbor.ID] = edge.ID
 					}
 				}
 			}
 		}
 	}
-	return weights
+	return weights, crossedEdges
 }
 
 // retrieve accessible vertices from vertex

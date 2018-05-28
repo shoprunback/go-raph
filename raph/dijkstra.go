@@ -5,6 +5,7 @@ type Dijkstra struct {
 	Q             []string
 	Costs         map[string]int
 	PredsVertices map[string]string
+	PredsEdges    map[string]string
 }
 
 const MaxUint = ^uint(0)
@@ -27,8 +28,9 @@ func NewDijkstra(g Graph) *Dijkstra {
 	}
 
 	predsVertices := map[string]string{}
+	predsEdges := map[string]string{}
 
-	return &Dijkstra{g, q, costs, predsVertices}
+	return &Dijkstra{g, q, costs, predsVertices, predsEdges}
 }
 
 func (d *Dijkstra) Reset() {
@@ -58,13 +60,15 @@ func (d *Dijkstra) PickVertexFromQ() string {
 	d.Q = Remove(d.Q, index)
 	return vertex
 }
+
 // because there can be multiple edges between s1 & s2, we pass edge parameter to store which edge we went though
-func (d *Dijkstra) UpdateDistances(s1, s2 string, s1s2Weight int) {
+func (d *Dijkstra) UpdateDistances(s1, s2, edge string, s1s2Weight int) {
 	cost := d.GetCost(s2)
 	potentialCost := d.GetCost(s1) + s1s2Weight
 	if potentialCost >= 0 && potentialCost < cost {
 		d.Costs[s2] = potentialCost
 		d.PredsVertices[s2] = s1
+		d.PredsEdges[s2] = edge
 	}
 }
 
@@ -75,9 +79,10 @@ func (d *Dijkstra) ShortestPath(from, to, minimize string, constraint Constraint
 	// run dijkstra until queue is empty
 	for len(d.Q) > 0 {
 		s1 := d.PickVertexFromQ()
-		neighbors := d.G.GetNeighborsWithCosts(s1, minimize, constraint)
+		neighbors, edges := d.G.GetNeighborsWithCostsAndEdges(s1, minimize, constraint)
 		for s2, cost := range neighbors {
-			d.UpdateDistances(s1, s2, cost)
+			edge := edges[s2]
+			d.UpdateDistances(s1, s2, edge, cost)
 		}
 	}
 
@@ -85,6 +90,7 @@ func (d *Dijkstra) ShortestPath(from, to, minimize string, constraint Constraint
 	path := []string{to}
 	current := to
 	for d.PredsVertices[current] != "" {
+		path = append(path, d.PredsEdges[current])
 		path = append(path, d.PredsVertices[current])
 		current = d.PredsVertices[current]
 	}
