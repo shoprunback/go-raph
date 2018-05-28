@@ -1,9 +1,9 @@
 package raph
 
 type Constraint struct {
-	Label       string
-	Props       map[string][]string
-	Costs       map[string]int
+	Label string
+	Props map[string][]string
+	Costs map[string]int
 }
 
 func NewConstraint(label string) *Constraint {

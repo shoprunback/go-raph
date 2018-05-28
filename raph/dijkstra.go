@@ -72,7 +72,7 @@ func (d *Dijkstra) UpdateDistances(s1, s2, edge string, s1s2Weight int) {
 	}
 }
 
-func (d *Dijkstra) ShortestPath(from, to string, constraint Constraint, minimize...string) ([]string, int) {
+func (d *Dijkstra) ShortestPath(from, to string, constraint Constraint, minimize ...string) ([]string, int) {
 	// init dijkstra with distance 0 for first vertex
 	d.Costs[from] = 0
 
