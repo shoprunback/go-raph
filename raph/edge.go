@@ -36,6 +36,7 @@ func (e *Edge) SetCost(cost string, value int) {
 }
 
 func (e *Edge) Satisfies(constraint Constraint) bool {
+
 	propsToSatisfy := constraint.EdgeProps
 	for propToSatisfy, satisfyingValues := range propsToSatisfy {
 		// retrieve property values of vertex

@@ -42,6 +42,7 @@ func (g Graph) GetNeighbors(vertex string, constraint Constraint) map[string]boo
 
 	for _, e := range edges {
 		edge := g.Edges[e]
+
 		// assert that edge satifies constraint
 		if edge.Satisfies(constraint) {
 			// retrieve edge ends
@@ -91,11 +92,11 @@ func (g Graph) GetNeighborsWithCosts(vertex, cost string, constraint Constraint)
 
 // retrieve accessible vertices from vertex
 func (g Graph) GetAccessibleVertices(vertex string, constraint Constraint) map[string]bool {
-	// retrieve neighbors of vertex
-	neighbors := g.GetNeighbors(vertex, constraint)
-
 	// only vertex is accessible at the beginning
 	accessibleVertices := map[string]bool{vertex: true}
+
+	// retrieve neighbors of vertex
+	neighbors := g.GetNeighbors(vertex, constraint)
 	for neighbor := range neighbors {
 		// pass accessible vertices map to be updated
 		g.getAccessibleVerticesRecursive(neighbor, constraint, accessibleVertices)

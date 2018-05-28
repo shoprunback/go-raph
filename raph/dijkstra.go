@@ -58,7 +58,6 @@ func (d *Dijkstra) PickVertexFromQ() string {
 	d.Q = Remove(d.Q, index)
 	return vertex
 }
-
 // because there can be multiple edges between s1 & s2, we pass edge parameter to store which edge we went though
 func (d *Dijkstra) UpdateDistances(s1, s2 string, s1s2Weight int) {
 	cost := d.GetCost(s2)

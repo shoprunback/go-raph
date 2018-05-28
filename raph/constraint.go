@@ -35,5 +35,8 @@ func (c Constraint) Copy() *Constraint {
 			constraintCopy.AddEdgeConstraint(prop, value)
 		}
 	}
+	for prop, value := range c.MinCosts {
+		constraintCopy.SetMinCostConstraint(prop, value)
+	}
 	return constraintCopy
 }
