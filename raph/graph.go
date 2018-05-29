@@ -1,5 +1,7 @@
 package raph
 
+import "log"
+
 type Graph struct {
 	Vertices    map[string]*Vertex
 	Edges       map[string]*Edge
@@ -10,6 +12,11 @@ func NewGraph() *Graph {
 	return &Graph{map[string]*Vertex{}, map[string]*Edge{}, map[string][]string{}}
 }
 
+func (g *Graph) hasVertex(id string) bool {
+	_, ok := g.Vertices[id]
+	return ok
+}
+
 func (g *Graph) AddVertex(v *Vertex) {
 	g.Vertices[v.ID] = v
 }
@@ -17,9 +24,15 @@ func (g *Graph) AddVertex(v *Vertex) {
 func (g *Graph) AddEdge(e *Edge) {
 	g.Edges[e.ID] = e
 	for from := range e.Froms {
+		if !g.hasVertex(from) {
+			log.Fatalln("Tried to connect", e.ID, "to", from, "but", from, "does not exist.")
+		}
 		g.Connect(from, e.ID, e.Label)
 	}
 	for to := range e.Tos {
+		if !g.hasVertex(to) {
+			log.Fatalln("Tried to connect", e.ID, "to", to, "but", to, "does not exist.")
+		}
 		g.Connect(e.ID, to, e.Label)
 	}
 }
@@ -69,6 +82,7 @@ func (g Graph) GetNeighborsWithCostsAndEdges(vertex string, constraint Constrain
 
 	for _, e := range edges {
 		edge := g.Edges[e]
+
 		// assert that edge satifies constraint
 		if edge.Satisfies(constraint) {
 			vertices := g.GetConnections(edge.ID, constraint.Label)
