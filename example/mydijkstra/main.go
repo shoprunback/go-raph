@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/shoprunback/go-raph/raph"
+	"go-raph/raph"
 )
 
 type MyDijkstra struct {
@@ -24,7 +24,7 @@ func (d *MyDijkstra) ShortestPath(from, to, minimize string, constraint raph.Con
 	costsToMinimize := []string{minimize}
 	for len(d.Q) > 0 {
 		s1 := d.PickVertexFromQ()
-		neighbors, edges := d.G.GetNeighborsWithCostsAndEdges(s1, costsToMinimize, constraint)
+		neighbors, edges := d.G.GetNeighborsWithCostsAndEdges(s1, constraint, costsToMinimize...)
 		for s2, cost := range neighbors {
 			edge := edges[s2]
 			d.UpdateDistances(s1, s2, edge, cost)

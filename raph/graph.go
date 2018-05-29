@@ -60,7 +60,7 @@ func (g Graph) GetNeighbors(vertex string, constraint Constraint) map[string]boo
 }
 
 // retrieve neighbors & costs of vertex under constraint
-func (g Graph) GetNeighborsWithCostsAndEdges(vertex string, costs []string, constraint Constraint) (map[string]int, map[string]string) {
+func (g Graph) GetNeighborsWithCostsAndEdges(vertex string, constraint Constraint, costs ...string) (map[string]int, map[string]string) {
 	weights := map[string]int{}
 	crossedEdges := map[string]string{}
 
