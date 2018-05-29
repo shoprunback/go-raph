@@ -40,13 +40,11 @@ func (g Graph) GetNeighbors(vertex string, constraint Constraint) map[string]boo
 	// retrieve outgoing edges with label
 	edges := g.GetConnections(vertex, constraint.Label)
 
-	for _, e := range edges {
-		edge := g.Edges[e]
-
+	for _, edge := range edges {
 		// assert that edge satifies constraint
-		if edge.Satisfies(constraint) {
+		if g.Edges[edge].Satisfies(constraint) {
 			// retrieve edge ends
-			vertices := g.GetConnections(edge.ID, constraint.Label)
+			vertices := g.GetConnections(edge, constraint.Label)
 
 			for _, neighbor := range vertices {
 				// assert that vertex satifies constraint
