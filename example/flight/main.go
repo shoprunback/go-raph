@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/shoprunback/go-raph/raph"
+	"go-raph/raph"
 )
 
 func main() {
