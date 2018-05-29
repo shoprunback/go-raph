@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"go-raph/raph"
+	"github.com/shoprunback/go-raph/raph"
 )
 
 type MyDijkstra struct {
