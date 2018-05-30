@@ -19,26 +19,25 @@ func (v *Vertex) SetCost(cost string, value int) {
 }
 
 func (v Vertex) Satisfies(constraint Constraint) bool {
-	propsToSatisfy := constraint.Props
-	for propToSatisfy, satisfyingValues := range propsToSatisfy {
+	props := constraint.Props
+	for prop, constraintValues := range props {
 		// retrieve property values of vertex
-		values, ok := v.Props[propToSatisfy]
+		values, ok := v.Props[prop]
 
 		// considered satisfied if property does not exist
 		if ok {
-			if !ContainsOne(values, satisfyingValues) {
+			if !ContainsOne(values, constraintValues) {
 				return false
 			}
 		}
 	}
 
-	costsToSatisfy := constraint.Costs
-	for costToSatisfy, minCost := range costsToSatisfy {
-		value, ok := v.Costs[costToSatisfy]
-
+	costs := constraint.Costs
+	for cost, threshold := range costs {
+		value, ok := v.Costs[cost]
 		if ok {
-			// if value exists, value should be greater or equal than constraint
-			if !(value >= minCost) {
+			// cost should be greater or equal than threshold
+			if !(value >= threshold) {
 				return false
 			}
 		}

@@ -2,9 +2,8 @@ package raph
 
 type Edge struct {
 	Vertex
-	Label string
-	Froms map[string]bool
-	Tos   map[string]bool
+	Label      string
+	Froms, Tos map[string]bool
 }
 
 func NewEdge(id, label, from, to string) *Edge {

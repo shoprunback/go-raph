@@ -1,6 +1,8 @@
 package raph
 
-import "log"
+import (
+	"log"
+)
 
 type Graph struct {
 	Vertices    map[string]*Vertex
@@ -28,12 +30,14 @@ func (g *Graph) AddEdge(e *Edge) {
 			log.Fatalln("Tried to connect", e.ID, "to", from, "but", from, "does not exist.")
 		}
 		g.Connect(from, e.ID, e.Label)
+		g.Connect(e.ID, from, "~"+e.Label)
 	}
 	for to := range e.Tos {
 		if !g.hasVertex(to) {
 			log.Fatalln("Tried to connect", e.ID, "to", to, "but", to, "does not exist.")
 		}
 		g.Connect(e.ID, to, e.Label)
+		g.Connect(to, e.ID, "~"+e.Label)
 	}
 }
 
@@ -95,11 +99,12 @@ func (g Graph) GetNeighborsWithCostsAndEdges(vertex string, constraint Constrain
 					// compute potential cost of crossing vertex+edge
 					potentialCost := 0
 					for _, cost := range costs {
-						potentialCost = potentialCost + edge.Costs[cost] + neighbor.Costs[cost]
+						potentialCost += edge.Costs[cost] + neighbor.Costs[cost]
 					}
-					actualCost, ok := weights[neighbor.ID]
 
-					if !ok || potentialCost < actualCost {
+					// compare potential cost to actual cost
+					cost, ok := weights[neighbor.ID]
+					if !ok || potentialCost < cost {
 						weights[neighbor.ID] = potentialCost
 						crossedEdges[neighbor.ID] = edge.ID
 					}
