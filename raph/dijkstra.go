@@ -1,11 +1,10 @@
 package raph
 
 type Dijkstra struct {
-	G             Graph
-	Q             []string
-	Costs         map[string]int
-	PredsVertices map[string]string
-	PredsEdges    map[string]string
+	G              Graph
+	Q              []string
+	Costs          map[string]int
+	PredsV, PredsE map[string]string
 }
 
 const MaxUint = ^uint(0)
@@ -27,10 +26,10 @@ func NewDijkstra(g Graph) *Dijkstra {
 		costs[vertex.ID] = MaxCost
 	}
 
-	predsVertices := map[string]string{}
-	predsEdges := map[string]string{}
+	PredsV := map[string]string{}
+	PredsE := map[string]string{}
 
-	return &Dijkstra{g, q, costs, predsVertices, predsEdges}
+	return &Dijkstra{g, q, costs, PredsV, PredsE}
 }
 
 func (d *Dijkstra) Reset() {
@@ -67,12 +66,14 @@ func (d *Dijkstra) UpdateDistances(s1, s2, edge string, s1s2Weight int) {
 	potentialCost := d.GetCost(s1) + s1s2Weight
 	if potentialCost >= 0 && potentialCost < cost {
 		d.Costs[s2] = potentialCost
-		d.PredsVertices[s2] = s1
-		d.PredsEdges[s2] = edge
+		d.PredsV[s2] = s1
+		d.PredsE[s2] = edge
 	}
 }
 
 func (d *Dijkstra) ShortestPath(from, to string, constraint Constraint, minimize ...string) ([]string, int) {
+	d.Reset()
+
 	// init dijkstra with distance 0 for first vertex
 	d.Costs[from] = 0
 
@@ -86,28 +87,14 @@ func (d *Dijkstra) ShortestPath(from, to string, constraint Constraint, minimize
 		}
 	}
 
-	// gather path
-	path := []string{to}
-	current := to
-	for d.PredsVertices[current] != "" {
-		path = append(path, d.PredsEdges[current])
-		path = append(path, d.PredsVertices[current])
-		current = d.PredsVertices[current]
-	}
-
 	// arrange return variables
-	Reverse(path)
+	path := NewPath(from, to, d.PredsV, d.PredsE).Get()
 	cost := d.GetCost(to)
-	if cost == MaxCost {
+	if from == to {
+		cost = 0
+	} else if len(path) == 0 || cost == MaxCost {
 		cost = -1
 	}
 
-	// reset dijkstra for further use
-	d.Reset()
-
-	if from != to && len(path) == 1 {
-		return []string{}, cost
-	} else {
-		return path, cost
-	}
+	return path, cost
 }
