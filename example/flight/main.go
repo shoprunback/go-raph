@@ -17,15 +17,15 @@ func main() {
 
 	// create edges
 	D := raph.NewEdge("P->B", "flight", "Paris", "Beijing")
-	D.AddProp("maxLuggageSize", "S")
+	D.SetProp("maxLuggageSize", "S")
 	D.SetCost("price", 500)
 	D.SetCost("time", 11)
 	E := raph.NewEdge("P->A", "flight", "Paris", "Amsterdam")
-	E.AddProp("maxLuggageSize", "L")
+	E.SetProp("maxLuggageSize", "L")
 	E.SetCost("price", 100)
 	E.SetCost("time", 5)
 	F := raph.NewEdge("A->B", "flight", "Amsterdam", "Beijing")
-	F.AddProp("maxLuggageSize", "L")
+	F.SetProp("maxLuggageSize", "L")
 	F.SetCost("price", 300)
 	F.SetCost("time", 10)
 
@@ -48,13 +48,13 @@ func main() {
 	constraint = raph.NewConstraint("flight")
 	path, cost = d.ShortestPath("Paris", "Beijing", *constraint, "time")
 	fmt.Println(path, cost)
-	// => [Paris Beijing] 11
+	// => [Paris P->B Beijing] 11
 
 	// find shortest path between Paris and Beijing, minimizing price
 	constraint = raph.NewConstraint("flight")
 	path, cost = d.ShortestPath("Paris", "Beijing", *constraint, "price")
 	fmt.Println(path, cost)
-	// => [Paris Amsterdam Beijing] 400
+	// => [Paris P->A Amsterdam A->B Beijing] 400
 
 	// find shortest path between Paris and Beijing accepting M or L luggages, minimizing time
 	constraint = raph.NewConstraint("flight")
@@ -62,12 +62,12 @@ func main() {
 	constraint.AddProp("maxLuggageSize", "L")
 	path, cost = d.ShortestPath("Paris", "Beijing", *constraint, "time")
 	fmt.Println(path, cost)
-	// => [Paris Amsterdam Beijing] 15
+	// => [Paris P->A Amsterdam A->B Beijing] 15
 
 	// find shortest path between Paris and Beijing, avoiding flights shorter than 10 hours, minimizing price
 	constraint = raph.NewConstraint("flight")
 	constraint.SetCost("time", 10)
 	path, cost = d.ShortestPath("Paris", "Beijing", *constraint, "price")
 	fmt.Println(path, cost)
-	// => [Paris Beijing] 500
+	// => [Paris P->B Beijing] 500
 }

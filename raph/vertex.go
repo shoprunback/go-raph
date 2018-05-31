@@ -1,17 +1,21 @@
 package raph
 
+import (
+	"encoding/json"
+)
+
 type Vertex struct {
-	ID    string
-	Props map[string][]string
-	Costs map[string]int
+	ID    string            `json:"id"`
+	Props map[string]string `json:"props"`
+	Costs map[string]int    `json:"costs"`
 }
 
 func NewVertex(id string) *Vertex {
-	return &Vertex{id, map[string][]string{}, map[string]int{}}
+	return &Vertex{id, map[string]string{}, map[string]int{}}
 }
 
-func (v *Vertex) AddProp(prop, value string) {
-	v.Props[prop] = append(v.Props[prop], value)
+func (v *Vertex) SetProp(prop, value string) {
+	v.Props[prop] = value
 }
 
 func (v *Vertex) SetCost(cost string, value int) {
@@ -22,11 +26,11 @@ func (v Vertex) Satisfies(constraint Constraint) bool {
 	props := constraint.Props
 	for prop, constraintValues := range props {
 		// retrieve property values of vertex
-		values, ok := v.Props[prop]
+		value, ok := v.Props[prop]
 
 		// considered satisfied if property does not exist
 		if ok {
-			if !ContainsOne(values, constraintValues) {
+			if !Contains(constraintValues, value) {
 				return false
 			}
 		}
@@ -45,4 +49,11 @@ func (v Vertex) Satisfies(constraint Constraint) bool {
 
 	// all constraints are satisfied
 	return true
+}
+
+func (v Vertex) ToJSON() map[string]interface{} {
+	var data map[string]interface{}
+	b, _ := json.Marshal(v)
+	json.Unmarshal(b, &data)
+	return data
 }
