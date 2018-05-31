@@ -6,12 +6,13 @@ import (
 
 type Vertex struct {
 	ID    string            `json:"id"`
+	Label string            `json:"label"`
 	Props map[string]string `json:"props"`
 	Costs map[string]int    `json:"costs"`
 }
 
-func NewVertex(id string) *Vertex {
-	return &Vertex{id, map[string]string{}, map[string]int{}}
+func NewVertex(id, label string) *Vertex {
+	return &Vertex{id, label,  map[string]string{}, map[string]int{}}
 }
 
 func (v *Vertex) SetProp(prop, value string) {

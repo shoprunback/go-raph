@@ -6,7 +6,6 @@ import (
 
 type Edge struct {
 	Vertex
-	Label string          `json:"label"`
 	Froms map[string]bool `json:"-"`
 	Tos   map[string]bool `json:"-"`
 }
@@ -18,7 +17,7 @@ func NewEdge(id, label, from, to string) *Edge {
 }
 
 func NewMultiEdge(id, label string, froms, tos map[string]bool) *Edge {
-	return &Edge{*NewVertex(id), label, froms, tos}
+	return &Edge{*NewVertex(id, label), froms, tos}
 }
 
 func (e Edge) ToJSON() map[string]interface{} {

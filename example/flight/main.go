@@ -11,9 +11,9 @@ func main() {
 	g := raph.NewGraph()
 
 	// create vertices
-	A := raph.NewVertex("Paris")
-	B := raph.NewVertex("Amsterdam")
-	C := raph.NewVertex("Beijing")
+	A := raph.NewVertex("Paris", "airport")
+	B := raph.NewVertex("Amsterdam", "airport")
+	C := raph.NewVertex("Beijing", "airport")
 
 	// create edges
 	D := raph.NewEdge("P->B", "flight", "Paris", "Beijing")
