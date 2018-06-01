@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 )
 
-// Edge represents an edge instance. It inheritates from Vertex structure.
+// Edge represents an edge instance. It inheritates from Vertex structure. Froms & Tos fields are removed from JSON Marshaling to be added manually as slices (cf ToJSON).
 type Edge struct {
 	Vertex
 	Froms map[string]bool `json:"-"` // list of vertices from which the edge is reachable
