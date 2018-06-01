@@ -28,7 +28,7 @@ func GetPath(from, to string, predsV, predsE map[string]string) []string {
 	return path
 }
 
-// Concat returns the path concatenated with the specified path.
+// Concat returns the path concatenated with the specified path. Last id of path, if it exists, should be equal to first id of path2, if it exists.
 func Concat(path, path2 []string) []string {
 	pathCopy := make([]string, len(path))
 	copy(pathCopy, path)
@@ -51,7 +51,7 @@ func Concat(path, path2 []string) []string {
 	return pathCopy
 }
 
-// GetDetailedPath returns a slice of objects corresponding to specified slice of ids and graph
+// GetDetailedPath returns a slice of objects corresponding to specified slice of ids. Path should alternate between vertices & edges.
 func GetDetailedPath(path []string, g Graph) []map[string]interface{} {
 	detailedPath := []map[string]interface{}{}
 	for i := 0; i < len(path)/2; i++ {
