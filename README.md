@@ -2,7 +2,7 @@
 
 go-raph is a highly customizable shortest path finder written in Go. It implements the Dijkstra algorithm with very detailed filters over vertices and edges properties.
 
-You can find a detailed documentation [here](raph)
+You can find a detailed documentation [here](https://godoc.org/github.com/shoprunback/go-raph/raph).
 
 ## Usage
 

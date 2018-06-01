@@ -82,22 +82,7 @@ func (d *Dijkstra) UpdateDistances(s1, s2, edge string, s1s2Weight int) {
 // ShortestPathDetailed returns detailed shortest path with its cost. The value minimized is the sum of specified costs (minimize slice).
 func (d *Dijkstra) ShortestPathDetailed(from, to string, constraint Constraint, minimize ...string) ([]map[string]interface{}, int) {
 	path, cost := d.ShortestPath(from, to, constraint, minimize...)
-
-	// gather path objects
-	detailedPath := []map[string]interface{}{}
-	for i := 0; i < len(path)/2; i++ {
-		placeID := path[2*i]
-		routeID := path[2*i+1]
-		place := d.G.Vertices[placeID].ToJSON()
-		route := d.G.Edges[routeID].ToJSON()
-		detailedPath = append(detailedPath, place, route)
-	}
-	if len(path) > 0 {
-		lastPlaceID := path[len(path)-1]
-		lastPlace := d.G.Vertices[lastPlaceID].ToJSON()
-		detailedPath = append(detailedPath, lastPlace)
-	}
-
+	detailedPath := GetDetailedPath(path, d.G)
 	return detailedPath, cost
 }
 
@@ -119,7 +104,7 @@ func (d *Dijkstra) ShortestPath(from, to string, constraint Constraint, minimize
 	}
 
 	// arrange return variables
-	path := NewPath(from, to, d.PredsV, d.PredsE).Get()
+	path := GetPath(from, to, d.PredsV, d.PredsE)
 	cost := d.GetCost(to)
 	if from == to {
 		cost = 0

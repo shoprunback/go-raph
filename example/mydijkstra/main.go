@@ -16,7 +16,7 @@ func NewMyDijkstra(g raph.Graph) *MyDijkstra {
 }
 
 // override raph.Dijkstra.ShortestPath()
-func (d *MyDijkstra) ShortestPath(from, to, minimize string, constraint raph.Constraint) ([]string, int) {
+func (d *MyDijkstra) ShortestPath(from, to string, constraint raph.Constraint, minimize string) ([]string, int) {
 	d.Reset()
 
 	// init dijkstra with distance 0 for first vertex
@@ -33,7 +33,7 @@ func (d *MyDijkstra) ShortestPath(from, to, minimize string, constraint raph.Con
 	}
 
 	// arrange return variables
-	path := raph.NewPath(from, to, d.PredsV, d.PredsE).Get()
+	path := raph.GetPath(from, to, d.PredsV, d.PredsE)
 	cost := d.GetCost(to)
 	if from == to {
 		cost = 0
@@ -61,7 +61,7 @@ func main() {
 	constraint := raph.NewConstraint("route")
 
 	// call customized method
-	path, cost := d.ShortestPath("A", "B", "cost", *constraint)
+	path, cost := d.ShortestPath("A", "B", *constraint, "cost")
 	fmt.Println(path, cost)
 	// => [A C B] 1
 }
