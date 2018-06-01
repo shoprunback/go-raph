@@ -1,86 +1,81 @@
 package raph
 
 import (
-	"strconv"
+	"log"
 )
 
-type Vertex struct {
-	ID    string
-	Props map[string]string
-}
-
-func NewVertex(id string, props map[string]string) *Vertex {
-	return &Vertex{id, props}
-}
-
-type Edge struct {
-	Vertex
-	Label string
-	Froms map[string]bool
-	Tos   map[string]bool
-}
-
-func NewMultiEdge(id, label string, froms, tos map[string]bool, props map[string]string) *Edge {
-	return &Edge{Vertex{id, props}, label, froms, tos}
-}
-
-func NewEdge(id, label, from, to string, props map[string]string) *Edge {
-	froms := map[string]bool{from: true}
-	tos := map[string]bool{to: true}
-	return &Edge{Vertex{id, props}, label, froms, tos}
-}
-
+// Graph represents a graph instance.
 type Graph struct {
-	Vertices []string
-	Edges    []string
-	db       Storage
+	Vertices    map[string]*Vertex
+	Edges       map[string]*Edge
+	Connections map[string][]string // indexes connection between vertices and edges
 }
 
+// NewGraph returns a new graph initilizated with empty fields.
 func NewGraph() *Graph {
-	db := NewStorage()
-	return &Graph{[]string{}, []string{}, *db}
+	return &Graph{map[string]*Vertex{}, map[string]*Edge{}, map[string][]string{}}
 }
 
+// hasVertex returns whether or not the graph contains the vertex specified by its id.
+func (g *Graph) hasVertex(id string) bool {
+	_, ok := g.Vertices[id]
+	return ok
+}
+
+// AddVertex adds a vertex to the graph.
 func (g *Graph) AddVertex(v *Vertex) {
-	g.Vertices = append(g.Vertices, v.ID)
-	g.db.SetProps(v.ID, v.Props)
+	g.Vertices[v.ID] = v
 }
 
+// AddEdge adds an edge to the graph and connects it the specified vertices. It also stores the inverse connections.
+// Adding an edge connecting vertices that does not exist raises an error.
 func (g *Graph) AddEdge(e *Edge) {
-	g.Edges = append(g.Edges, e.ID)
-	g.db.SetProps(e.ID, e.Props)
-
-	// connect all "from" vertices to edge
+	g.Edges[e.ID] = e
 	for from := range e.Froms {
+		if !g.hasVertex(from) {
+			log.Fatalln("Tried to connect", e.ID, "to", from, "but", from, "does not exist")
+		}
 		g.Connect(from, e.ID, e.Label)
+		// store inverse relation
+		g.Connect(e.ID, from, "~"+e.Label)
 	}
-
-	// connect edge to all "to" vertices
 	for to := range e.Tos {
+		if !g.hasVertex(to) {
+			log.Fatalln("Tried to connect", e.ID, "to", to, "but", to, "does not exist")
+		}
 		g.Connect(e.ID, to, e.Label)
+		// store inverse relation
+		g.Connect(to, e.ID, "~"+e.Label)
 	}
 }
 
-func (g *Graph) Connect(from, to, label string) {
-	g.db.Push(from, label, to)
+// GetConnections returns reachable vertices or edges from specified edge or vertex, respectively.
+func (g *Graph) GetConnections(id, label string) []string {
+	return g.Connections[id+":"+label]
 }
 
-// retrieve neighbors of vertex
-func (g Graph) GetNeighbors(vertex string, constraints Constraints) map[string]bool {
+// Connect adds specified connection to the graph indexed on label.
+func (g *Graph) Connect(from, to, label string) {
+	key := from + ":" + label
+	g.Connections[key] = append(g.Connections[key], to)
+}
+
+// GetNeighbors retrieves neighbors of vertex under specified constraints.
+func (g Graph) GetNeighbors(vertex string, constraint Constraint) map[string]bool {
 	neighbors := map[string]bool{}
 
 	// retrieve outgoing edges with label
-	edges := g.db.Pull(vertex, constraints.EdgeLabel)
+	edges := g.GetConnections(vertex, constraint.Label)
 
 	for _, edge := range edges {
-		// assert that edge satifies constraints
-		if g.Satisfies(edge, constraints.EdgeProps) {
+		// assert that edge satifies constraint
+		if g.Edges[edge].Satisfies(constraint) {
 			// retrieve edge ends
-			vertices := g.db.Pull(edge, constraints.EdgeLabel)
+			vertices := g.GetConnections(edge, constraint.Label)
 
 			for _, neighbor := range vertices {
-				// assert that vertex satifies constraints
-				if g.Satisfies(neighbor, constraints.VertexProps) {
+				// assert that vertex satifies constraint
+				if g.Vertices[neighbor].Satisfies(constraint) {
 					// add vertex to neighbors
 					neighbors[neighbor] = true
 				}
@@ -91,98 +86,72 @@ func (g Graph) GetNeighbors(vertex string, constraints Constraints) map[string]b
 	return neighbors
 }
 
-// retrieve neighbors of vertexID through edgeLabel with edgeConstraints, minimizing weightProp
-func (g Graph) GetNeighborsWithEdgesAndWeights(vertex, weightProp string, constraints Constraints) (map[string]string, map[string]int) {
-	crossedEdges := map[string]string{}
+// GetNeighborsWithCostsAndEdges returns reachable vertices. For each neighbor, it returns with the minimal cost and the crossed edge (in the case of multiedges).
+func (g Graph) GetNeighborsWithCostsAndEdges(vertex string, constraint Constraint, costs ...string) (map[string]int, map[string]string) {
 	weights := map[string]int{}
+	crossedEdges := map[string]string{}
 
 	// retrieve outgoing edges with label
-	edges := g.db.Pull(vertex, constraints.EdgeLabel)
+	edges := g.GetConnections(vertex, constraint.Label)
 
-	for _, edge := range edges {
-		// assert that edge satifies constraints
-		if g.Satisfies(edge, constraints.EdgeProps) {
-			// retrieve weight of edge
-			if weightString, ok := g.db.GetProp(edge, weightProp); ok {
-				// the weight exists
-				weight, _ := strconv.Atoi(weightString)
-				vertices := g.db.Pull(edge, constraints.EdgeLabel)
+	for _, e := range edges {
+		edge := g.Edges[e]
 
-				for _, neighbor := range vertices {
-					// assert that vertex satifies constraints
-					if g.Satisfies(neighbor, constraints.VertexProps) {
-						if currentWeight, exist := weights[neighbor]; !exist || weight < currentWeight {
-							// update the path to the vertex
-							crossedEdges[neighbor] = edge
-							weights[neighbor] = weight
-						}
+		// assert that edge satifies constraint
+		if edge.Satisfies(constraint) {
+			vertices := g.GetConnections(edge.ID, constraint.Label)
+
+			for _, n := range vertices {
+				neighbor := g.Vertices[n]
+
+				// assert that vertex satifies constraint
+				if neighbor.Satisfies(constraint) {
+					// compute potential cost of crossing vertex+edge
+					potentialCost := 0
+					for _, cost := range costs {
+						potentialCost += edge.Costs[cost] + neighbor.Costs[cost]
+					}
+
+					// compare potential cost to actual cost
+					cost, ok := weights[neighbor.ID]
+					if !ok || potentialCost < cost {
+						weights[neighbor.ID] = potentialCost
+						crossedEdges[neighbor.ID] = edge.ID
 					}
 				}
 			}
 		}
 	}
-	return crossedEdges, weights
+	return weights, crossedEdges
 }
 
-// retrieve accessible vertices from vertex
-func (g Graph) GetAccessibleVertices(vertex string, constraints Constraints) map[string]bool {
-	// retrieve neighbors of vertex
-	neighbors := g.GetNeighbors(vertex, constraints)
-
+// GetAccessibleVertices returns accessible vertices from vertex using private method getAccessibleVerticesRecursive.
+func (g Graph) GetAccessibleVertices(vertex string, constraint Constraint) map[string]bool {
 	// only vertex is accessible at the beginning
 	accessibleVertices := map[string]bool{vertex: true}
+
+	// retrieve neighbors of vertex
+	neighbors := g.GetNeighbors(vertex, constraint)
 	for neighbor := range neighbors {
 		// pass accessible vertices map to be updated
-		g.getAccessibleVerticesRecursive(neighbor, constraints, accessibleVertices)
+		g.getAccessibleVerticesRecursive(neighbor, constraint, accessibleVertices)
 	}
 
 	return accessibleVertices
 }
 
-// retrieve accessible vertices from vertexID through edgeLabel with edgeConstraints
-func (g Graph) getAccessibleVerticesRecursive(vertex string, constraints Constraints, accessibleVertices map[string]bool) {
+// getAccessibleVerticesRecursive adds accessible vertices from vertex to accessibleVertices.
+func (g Graph) getAccessibleVerticesRecursive(vertex string, constraint Constraint, accessibleVertices map[string]bool) {
 	// inform that the vertex is accessible
 	accessibleVertices[vertex] = true
 
 	// retrieve neighbors of vertex
-	neighbors := g.GetNeighbors(vertex, constraints)
+	neighbors := g.GetNeighbors(vertex, constraint)
 
 	// recursive call on all neighbors if not done yet
 	for neighbor := range neighbors {
 		if _, ok := accessibleVertices[neighbor]; !ok {
-			g.getAccessibleVerticesRecursive(neighbor, constraints, accessibleVertices)
+			g.getAccessibleVerticesRecursive(neighbor, constraint, accessibleVertices)
 		}
 	}
-}
-
-// check if id element statisfies props
-func (g Graph) Satisfies(id string, props map[string][]string) bool {
-	for prop, satisfyingValues := range props {
-		// retrieve property value of id element
-		propString, ok := g.db.GetProp(id, prop)
-
-		// if property does not exist
-		if !ok {
-			return false
-		}
-
-		// check if property can be converted to int
-		propInt, notInt := strconv.Atoi(propString)
-
-		if notInt != nil {
-			// if propString is a string, we check if it is in acceptedValues
-			if !Contains(satisfyingValues, propString) {
-				return false
-			}
-		} else {
-			// if prop is an integer, propInt should be grater or equal than constraint
-			min, _ := strconv.Atoi(satisfyingValues[0])
-			if !(propInt >= min) {
-				return false
-			}
-		}
-	}
-
-	// all constraints are satisfied
-	return true
 }

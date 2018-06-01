@@ -18,6 +18,33 @@ func Contains(s []string, e string) bool {
 	return false
 }
 
+func ContainsOne(s []string, e []string) bool {
+	for _, ev := range e {
+		for _, sv := range s {
+			if sv == ev {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func ContainsAll(s []string, e []string) bool {
+	for _, ev := range e {
+		found := false
+		for _, sv := range s {
+			if sv == ev {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return false
+		}
+	}
+	return true
+}
+
 func Remove(s []string, i int) []string {
 	s[i] = s[len(s)-1]
 	return s[:len(s)-1]
