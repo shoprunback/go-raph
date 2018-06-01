@@ -37,13 +37,13 @@ func NewMultiEdge(id, label string, froms, tos map[string]bool) *Edge {}
 Properties are sets of strings. They can be added to vertices and edges.
 
 ```go
-A := raph.NewVertex("Quentin")
-A.AddProp("job", "student")
-A.AddProp("job", "intern")
-A.SetCost("coffee", 2)
-fmt.Println(A.Props["job"])
-fmt.Println(A.Costs["coffee"])
-// => [student intern]
+A := raph.NewVertex("Quentin", "people")
+A.AddProp("drinks", "water")
+A.AddProp("drinks", "coffee", "juice")
+A.SetCost("brothers", 2)
+fmt.Println(A.Props["drinks"])
+fmt.Println(A.Costs["brothers"])
+// => [water coffee juice]
 // => 2
 ```
 
