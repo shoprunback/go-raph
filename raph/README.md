@@ -58,9 +58,9 @@ type Constraint struct {
 }
 ```
 
-Constraint is the constraint used to filter out nodes. It inheritates from
-Vertex structure because it behaves more or less like a Vertex against which we
-will compare vertices and edges. Its ID is not important.
+Constraint is an instance used to filter out nodes. It inheritates from Vertex
+structure because it behaves more or less like a Vertex against which we will
+compare vertices and edges. Its ID is not important.
 
 #### func  NewConstraint
 
@@ -151,7 +151,9 @@ type Edge struct {
 }
 ```
 
-Edge represents an edge instance. It inheritates from Vertex structure.
+Edge represents an edge instance. It inheritates from Vertex structure. Froms &
+Tos fields are removed from JSON Marshaling to be added manually as slices (cf
+ToJSON).
 
 #### func  NewEdge
 
