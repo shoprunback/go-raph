@@ -1,6 +1,6 @@
 # raph
 --
-    import "go-raph/raph"
+    import "github.com/shoprunback/go-raph/raph"
 
 
 ## Usage
