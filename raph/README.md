@@ -304,9 +304,9 @@ NewVertex returns a new vertex.
 #### func (*Vertex) AddProp
 
 ```go
-func (v *Vertex) AddProp(prop, value string)
+func (v *Vertex) AddProp(prop string, values ...string)
 ```
-AddProp adds a property to the vertex.
+AddProp adds a list of property values to the vertex.
 
 #### func (Vertex) Satisfies
 
