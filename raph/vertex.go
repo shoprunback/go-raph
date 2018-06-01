@@ -18,7 +18,7 @@ func NewVertex(id, label string) *Vertex {
 }
 
 // AddProp adds a list of property values to the vertex.
-func (v *Vertex) AddProp(prop, values ...string) {
+func (v *Vertex) AddProp(prop string, values ...string) {
 	v.Props[prop] = append(v.Props[prop], values...)
 }
 
