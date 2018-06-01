@@ -124,14 +124,16 @@ Reset resets the Dijkstra instance for further use.
 ```go
 func (d *Dijkstra) ShortestPath(from, to string, constraint Constraint, minimize ...string) ([]string, int)
 ```
-ShortestPath returns a slice of ids with its cost.
+ShortestPath returns a slice of ids with its cost. The value minimized is the
+sum of specified costs (minimize slice).
 
 #### func (*Dijkstra) ShortestPathDetailed
 
 ```go
 func (d *Dijkstra) ShortestPathDetailed(from, to string, constraint Constraint, minimize ...string) ([]map[string]interface{}, int)
 ```
-ShortestPathDetailed returns detailed shortest path with its cost.
+ShortestPathDetailed returns detailed shortest path with its cost. The value
+minimized is the sum of specified costs (minimize slice).
 
 #### func (*Dijkstra) UpdateDistances
 
