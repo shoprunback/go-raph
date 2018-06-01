@@ -1,25 +1,34 @@
 package raph
 
-// Constraint is an instance used to filter out nodes. It inherits from Vertex structure because it behaves more or less like a Vertex against which we will compare vertices and edges. Its ID is not important.
-type Constraint struct {
-	Vertex
+type Constraints struct {
+	EdgeLabel string
+	VertexProps map[string][]string
+	EdgeProps   map[string][]string
 }
 
-// NewConstraint returns a constraint with specified label.
-func NewConstraint(label string) *Constraint {
-	return &Constraint{*NewVertex("useless", label)}
+func NewConstraints(label string) *Constraints {
+	return &Constraints{label, map[string][]string{}, map[string][]string{}}
 }
 
-// Copy returns a copy of the constraint.
-func (c Constraint) Copy() *Constraint {
-	constraint := NewConstraint(c.Label)
-	for prop, values := range c.Props {
+func (c *Constraints) AddVertexConstraint(prop, value string) {
+	c.VertexProps[prop] = append(c.VertexProps[prop], value)
+}
+
+func (c *Constraints) AddEdgeConstraint(prop, value string) {
+	c.EdgeProps[prop] = append(c.EdgeProps[prop], value)
+}
+
+func (c Constraints) Copy() *Constraints {
+	constraintsCopy := NewConstraints(c.EdgeLabel)
+	for prop, values := range c.VertexProps {
 		for _, value := range values {
-			constraint.AddProp(prop, value)
+			constraintsCopy.AddVertexConstraint(prop, value)
 		}
 	}
-	for cost, value := range c.Costs {
-		constraint.SetCost(cost, value)
+	for prop, values := range c.EdgeProps {
+		for _, value := range values {
+			constraintsCopy.AddEdgeConstraint(prop, value)
+		}
 	}
-	return constraint
+	return constraintsCopy
 }
