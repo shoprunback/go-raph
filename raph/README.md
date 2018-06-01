@@ -14,6 +14,13 @@ const (
 ```
 Sets MaxCost to MaxInt.
 
+#### func  Concat
+
+```go
+func Concat(path, path2 []string) []string
+```
+Concat returns the path concatenated with the specified path.
+
 #### func  Contains
 
 ```go
@@ -31,6 +38,21 @@ func ContainsAll(s []string, e []string) bool
 ```go
 func ContainsOne(s []string, e []string) bool
 ```
+
+#### func  GetDetailedPath
+
+```go
+func GetDetailedPath(path []string, g Graph) []map[string]interface{}
+```
+GetDetailedPath returns a slice of objects corresponding to specified slice of
+ids and graph
+
+#### func  GetPath
+
+```go
+func GetPath(from, to string, predsV, predsE map[string]string) []string
+```
+GetPath returns the path as a slice of strings.
 
 #### func  RandSeq
 
@@ -250,40 +272,6 @@ func (g Graph) GetNeighborsWithCostsAndEdges(vertex string, constraint Constrain
 ```
 GetNeighborsWithCostsAndEdges returns reachable vertices. For each neighbor, it
 returns with the minimal cost and the crossed edge (in the case of multiedges).
-
-#### type Path
-
-```go
-type Path struct {
-	From   string
-	To     string
-	PredsV map[string]string
-	PredsE map[string]string
-}
-```
-
-Path instance helps building a path from Dijkstra result.
-
-#### func  NewPath
-
-```go
-func NewPath(from, to string, vertices, edges map[string]string) *Path
-```
-NewPath returns a path instance.
-
-#### func (Path) Append
-
-```go
-func (p Path) Append(path2 []string) []string
-```
-Append returns the path concatenated with the specified path.
-
-#### func (Path) Get
-
-```go
-func (p Path) Get() []string
-```
-Get returns the path as a slice of strings.
 
 #### type Vertex
 
