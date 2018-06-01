@@ -19,7 +19,8 @@ Sets MaxCost to MaxInt.
 ```go
 func Concat(path, path2 []string) []string
 ```
-Concat returns the path concatenated with the specified path.
+Concat returns the path concatenated with the specified path. Last id of path,
+if it exists, should be equal to first id of path2, if it exists.
 
 #### func  Contains
 
@@ -45,7 +46,7 @@ func ContainsOne(s []string, e []string) bool
 func GetDetailedPath(path []string, g Graph) []map[string]interface{}
 ```
 GetDetailedPath returns a slice of objects corresponding to specified slice of
-ids and graph
+ids. Path should alternate between vertices & edges.
 
 #### func  GetPath
 
