@@ -4,53 +4,63 @@ import (
 	"log"
 )
 
+// Graph represents a graph instance.
 type Graph struct {
 	Vertices    map[string]*Vertex
 	Edges       map[string]*Edge
-	Connections map[string][]string
+	Connections map[string][]string // indexes connection between vertices and edges
 }
 
+// NewGraph returns a new graph initilizated with empty fields.
 func NewGraph() *Graph {
 	return &Graph{map[string]*Vertex{}, map[string]*Edge{}, map[string][]string{}}
 }
 
+// hasVertex returns whether or not the graph contains the vertex specified by its id.
 func (g *Graph) hasVertex(id string) bool {
 	_, ok := g.Vertices[id]
 	return ok
 }
 
+// AddVertex adds a vertex to the graph.
 func (g *Graph) AddVertex(v *Vertex) {
 	g.Vertices[v.ID] = v
 }
 
+// AddEdge adds an edge to the graph and connects it the specified vertices. It also stores the inverse connections.
+// Adding an edge connecting vertices that does not exist raises an error.
 func (g *Graph) AddEdge(e *Edge) {
 	g.Edges[e.ID] = e
 	for from := range e.Froms {
 		if !g.hasVertex(from) {
-			log.Fatalln("Tried to connect", e.ID, "to", from, "but", from, "does not exist.")
+			log.Fatalln("Tried to connect", e.ID, "to", from, "but", from, "does not exist")
 		}
 		g.Connect(from, e.ID, e.Label)
+		// store inverse relation
 		g.Connect(e.ID, from, "~"+e.Label)
 	}
 	for to := range e.Tos {
 		if !g.hasVertex(to) {
-			log.Fatalln("Tried to connect", e.ID, "to", to, "but", to, "does not exist.")
+			log.Fatalln("Tried to connect", e.ID, "to", to, "but", to, "does not exist")
 		}
 		g.Connect(e.ID, to, e.Label)
+		// store inverse relation
 		g.Connect(to, e.ID, "~"+e.Label)
 	}
 }
 
+// GetConnections returns reachable vertices or edges from specified edge or vertex, respectively.
 func (g *Graph) GetConnections(id, label string) []string {
 	return g.Connections[id+":"+label]
 }
 
+// Connect adds specified connection to the graph indexed on label.
 func (g *Graph) Connect(from, to, label string) {
 	key := from + ":" + label
 	g.Connections[key] = append(g.Connections[key], to)
 }
 
-// retrieve neighbors of vertex
+// GetNeighbors retrieves neighbors of vertex under specified constraints.
 func (g Graph) GetNeighbors(vertex string, constraint Constraint) map[string]bool {
 	neighbors := map[string]bool{}
 
@@ -76,7 +86,7 @@ func (g Graph) GetNeighbors(vertex string, constraint Constraint) map[string]boo
 	return neighbors
 }
 
-// retrieve neighbors & costs of vertex under constraint
+// GetNeighborsWithCostsAndEdges returns reachable vertices. For each neighbor, it returns with the minimal cost and the crossed edge (in the case of multiedges).
 func (g Graph) GetNeighborsWithCostsAndEdges(vertex string, constraint Constraint, costs ...string) (map[string]int, map[string]string) {
 	weights := map[string]int{}
 	crossedEdges := map[string]string{}
@@ -115,7 +125,7 @@ func (g Graph) GetNeighborsWithCostsAndEdges(vertex string, constraint Constrain
 	return weights, crossedEdges
 }
 
-// retrieve accessible vertices from vertex
+// GetAccessibleVertices returns accessible vertices from vertex using private method getAccessibleVerticesRecursive.
 func (g Graph) GetAccessibleVertices(vertex string, constraint Constraint) map[string]bool {
 	// only vertex is accessible at the beginning
 	accessibleVertices := map[string]bool{vertex: true}
@@ -130,7 +140,7 @@ func (g Graph) GetAccessibleVertices(vertex string, constraint Constraint) map[s
 	return accessibleVertices
 }
 
-// retrieve accessible vertices from vertexID through edgeLabel with edgeConstraint
+// getAccessibleVerticesRecursive adds accessible vertices from vertex to accessibleVertices.
 func (g Graph) getAccessibleVerticesRecursive(vertex string, constraint Constraint, accessibleVertices map[string]bool) {
 	// inform that the vertex is accessible
 	accessibleVertices[vertex] = true

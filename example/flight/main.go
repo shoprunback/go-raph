@@ -17,15 +17,15 @@ func main() {
 
 	// create edges
 	D := raph.NewEdge("P->B", "flight", "Paris", "Beijing")
-	D.SetProp("maxLuggageSize", "S")
+	D.AddProp("maxLuggageSize", "S")
 	D.SetCost("price", 500)
 	D.SetCost("time", 11)
 	E := raph.NewEdge("P->A", "flight", "Paris", "Amsterdam")
-	E.SetProp("maxLuggageSize", "L")
+	E.AddProp("maxLuggageSize", "L")
 	E.SetCost("price", 100)
 	E.SetCost("time", 5)
 	F := raph.NewEdge("A->B", "flight", "Amsterdam", "Beijing")
-	F.SetProp("maxLuggageSize", "L")
+	F.AddProp("maxLuggageSize", "L")
 	F.SetCost("price", 300)
 	F.SetCost("time", 10)
 

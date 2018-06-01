@@ -1,15 +1,20 @@
 package raph
 
+// Dijkstra instance is used to compute Dijkstra algorithm.
 type Dijkstra struct {
-	G              Graph
-	Q              []string
-	Costs          map[string]int
-	PredsV, PredsE map[string]string
+	G      Graph
+	Q      []string
+	Costs  map[string]int
+	PredsV map[string]string
+	PredsE map[string]string
 }
 
-const MaxUint = ^uint(0)
-const MaxInt = int(MaxUint >> 1)
-const MaxCost = MaxInt
+// Sets MaxCost to MaxInt.
+const (
+	MaxUint = ^uint(0)
+	MaxInt  = int(MaxUint >> 1)
+	MaxCost = MaxInt
+)
 
 func NewDijkstra(g Graph) *Dijkstra {
 	vertices := g.Vertices
@@ -32,18 +37,21 @@ func NewDijkstra(g Graph) *Dijkstra {
 	return &Dijkstra{g, q, costs, PredsV, PredsE}
 }
 
+// Reset resets the Dijkstra instance for further use.
 func (d *Dijkstra) Reset() {
 	*d = *NewDijkstra(d.G)
 }
 
-func (d Dijkstra) GetCost(v string) int {
-	if cost, ok := d.Costs[v]; ok {
+// GetCost returns the cost of speficied vertex. If it has not been set by UpdateDistances yet, it returns MaxCost.
+func (d Dijkstra) GetCost(id string) int {
+	if cost, ok := d.Costs[id]; ok {
 		return cost
 	} else {
 		return MaxCost
 	}
 }
 
+// PickVertexFromQ returns the vertex with minimal cost and removes it from the queue.
 func (d *Dijkstra) PickVertexFromQ() string {
 	min := d.GetCost(d.Q[0])
 	vertex := d.Q[0]
@@ -60,7 +68,7 @@ func (d *Dijkstra) PickVertexFromQ() string {
 	return vertex
 }
 
-// because there can be multiple edges between s1 & s2, we pass edge parameter to store which edge we went though
+// UpdateDistances updates the costs of s2 if it is not minimal. It also stores the edge crossed to get that minimal cost.
 func (d *Dijkstra) UpdateDistances(s1, s2, edge string, s1s2Weight int) {
 	cost := d.GetCost(s2)
 	potentialCost := d.GetCost(s1) + s1s2Weight
@@ -71,6 +79,29 @@ func (d *Dijkstra) UpdateDistances(s1, s2, edge string, s1s2Weight int) {
 	}
 }
 
+// ShortestPathDetailed returns detailed shortest path with its cost.
+func (d *Dijkstra) ShortestPathDetailed(from, to string, constraint Constraint, minimize ...string) ([]map[string]interface{}, int) {
+	path, cost := d.ShortestPath(from, to, constraint, minimize...)
+
+	// gather path properties
+	detailedPath := []map[string]interface{}{}
+	for i := 0; i < len(path)/2; i++ {
+		placeID := path[2*i]
+		routeID := path[2*i+1]
+		place := d.G.Vertices[placeID].ToJSON()
+		route := d.G.Edges[routeID].ToJSON()
+		detailedPath = append(detailedPath, place, route)
+	}
+	if len(path) > 0 {
+		lastPlaceID := path[len(path)-1]
+		lastPlace := d.G.Vertices[lastPlaceID].ToJSON()
+		detailedPath = append(detailedPath, lastPlace)
+	}
+
+	return detailedPath, cost
+}
+
+// ShortestPath returns a slice of ids with its cost.
 func (d *Dijkstra) ShortestPath(from, to string, constraint Constraint, minimize ...string) ([]string, int) {
 	d.Reset()
 

@@ -16,7 +16,7 @@ To initialize a graph, you can use the built-in **_NewGraph()_** function.
 g := raph.NewGraph()
 ```
 
-### Vertices and Edges
+### Vertices & Edges
 
 Graphs can store vertices, edges and multiedges.
 
@@ -25,12 +25,12 @@ A multiedge is an edge that can have multiple origins and destinations. It is us
 #### Prototypes
 
 ```go
-func NewVertex(id string) *Vertex {}
+func NewVertex(id, label string) *Vertex {}
 func NewEdge(id, label, from, to string) *Edge {}
 func NewMultiEdge(id, label string, froms, tos map[string]bool) *Edge {}
 ```
 
-#### Properties
+#### Properties & Costs
 
 Properties are sets of strings. They can be added to vertices and edges.
 
@@ -38,22 +38,35 @@ Properties are sets of strings. They can be added to vertices and edges.
 A := raph.NewVertex("Quentin")
 A.AddProp("job", "student")
 A.AddProp("job", "intern")
+A.SetCost("coffee", 2)
 fmt.Println(A.Props["job"])
+fmt.Println(A.Costs["coffee"])
 // => [student intern]
+// => 2
 ```
 
 #### Costs
 
 Costs are integer values. They can be set on vertices and edges.
 
-They are used during shortest path computation:
-- as the value to minimize
-- to filter vertices and edges
+They are used during shortest path computation as:
+- the value to minimize
+- a threshold to filter out vertices and edges
 
 ```go
 A := raph.NewEdge("US Route 66", "route", "Chicago", "Santa Monica")
+A.AddProp("states", "Illinois")
+A.AddProp("states", "Missouri")
+A.AddProp("states", "Kansas")
+A.AddProp("states", "Oklahoma")
+A.AddProp("states", "Texas")
+A.AddProp("states", "New Mexico")
+A.AddProp("states", "Arizona")
+A.AddProp("states", "California")
 A.SetCost("length", 3940)
+fmt.Println(A.Props["states"])
 fmt.Println(A.Costs["length"])
+// => [Illinois Missouri Kansas Oklahoma Texas New Mexico Arizona California]
 // => 3940
 ```
 
@@ -66,9 +79,9 @@ You can add vertices and edges to a `Graph` instance.
 g := raph.NewGraph()
 
 // create vertices
-A := raph.NewVertex("Paris")
-B := raph.NewVertex("Amsterdam")
-C := raph.NewVertex("Beijing")
+A := raph.NewVertex("Paris", "city")
+B := raph.NewVertex("Amsterdam", "city")
+C := raph.NewVertex("Beijing", "city")
 
 // create edges
 D := raph.NewEdge("P->B", "flight", "Paris", "Beijing")

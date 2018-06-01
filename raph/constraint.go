@@ -1,23 +1,16 @@
 package raph
 
+// Constraint is the constraint used to filter out nodes. It inheritates from Vertex structure because it behaves more or less like a Vertex against which we will compare vertices and edges. Its ID is not important.
 type Constraint struct {
-	Label string
-	Props map[string][]string
-	Costs map[string]int
+	Vertex
 }
 
+// NewConstraint returns a constraint with specified label.
 func NewConstraint(label string) *Constraint {
-	return &Constraint{label, map[string][]string{}, map[string]int{}}
+	return &Constraint{*NewVertex("useless", label)}
 }
 
-func (c *Constraint) AddProp(prop, value string) {
-	c.Props[prop] = append(c.Props[prop], value)
-}
-
-func (c *Constraint) SetCost(prop string, value int) {
-	c.Costs[prop] = value
-}
-
+// Copy returns a copy of the constraint.
 func (c Constraint) Copy() *Constraint {
 	constraint := NewConstraint(c.Label)
 	for prop, values := range c.Props {
