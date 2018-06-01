@@ -1,6 +1,6 @@
 package raph
 
-// Constraint is an instance used to filter out nodes. It inheritates from Vertex structure because it behaves more or less like a Vertex against which we will compare vertices and edges. Its ID is not important.
+// Constraint is an instance used to filter out nodes. It inherits from Vertex structure because it behaves more or less like a Vertex against which we will compare vertices and edges. Its ID is not important.
 type Constraint struct {
 	Vertex
 }
