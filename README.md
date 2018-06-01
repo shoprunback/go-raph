@@ -110,8 +110,16 @@ You can compute shortest paths with a `Dijkstra` instance. If no path exists, `c
 `Constraint` objects let you customize path traversals to fit your needs.
 
 To filter out nodes and edges, simply use:
-- `Constraint.AddProp(prop, value string)` The node/edge will be filtered out if there is no intersection between the props of the node/edge and the props of the constraint. If a node/edge does not have the property specified by the constraint, it will not be filtered out.
-- `Constraint.SetCost(prop string, value int)` acts like a threshold: will dodge the node/edge if the property value is less than specified value. If the cost of the node/edge is not defined, it will not be filtered out.
+- `Constraint.AddProp(prop, value string)` The node/edge will be filtered out if there is no intersection between the props of the vertex/edge and the props of the constraint. If a vertex/edge does not have the property specified by the constraint, it will not be filtered out.
+
+- `Constraint.SetCost(prop string, value int)` acts like a threshold: will dodge the vertex/edge if the property value is less than specified value. If a vertex/edge does not contain the cost to minimize, passing though it will cost `0`.
+
+#### Prototypes
+
+```go
+func (d *Dijkstra) ShortestPath(from, to string, constraint Constraint, minimize ...string) ([]string, int) // slice of ids
+func (d *Dijkstra) ShortestPathDetailed(from, to string, constraint Constraint, minimize ...string) ([]map[string]interface{}, int) // slice of detailed objects
+```
 
 ```go
 // init dijkstra
@@ -148,8 +156,6 @@ path, cost = d.ShortestPath("Paris", "Beijing", *constraint, "price")
 fmt.Println(path, cost)
 // => [Paris Beijing] 500
 ```
-
-If a node/edge does not contain the cost to minimize, passing though it will cost `0`.
 
 You can minimize more than a single cost by giving a list of costs at the end of **_ShortestPath()_** method. For instance, if you want to minimize **_2 x time + price_**, call `d.ShortestPath("Paris", "Beijing", *constraint, "time", "time", "price")`.
 
