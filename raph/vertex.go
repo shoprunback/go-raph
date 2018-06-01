@@ -17,9 +17,9 @@ func NewVertex(id, label string) *Vertex {
 	return &Vertex{id, label, map[string][]string{}, map[string]int{}}
 }
 
-// AddProp adds a property to the vertex.
-func (v *Vertex) AddProp(prop, value string) {
-	v.Props[prop] = append(v.Props[prop], value)
+// AddProp adds a list of property values to the vertex.
+func (v *Vertex) AddProp(prop, values ...string) {
+	v.Props[prop] = append(v.Props[prop], values...)
 }
 
 // SetCost sets a cost value for the vertex.

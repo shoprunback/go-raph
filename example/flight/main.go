@@ -58,8 +58,7 @@ func main() {
 
 	// find shortest path between Paris and Beijing accepting M or L luggages, minimizing time
 	constraint = raph.NewConstraint("flight")
-	constraint.AddProp("maxLuggageSize", "M")
-	constraint.AddProp("maxLuggageSize", "L")
+	constraint.AddProp("maxLuggageSize", "M", "L")
 	path, cost = d.ShortestPath("Paris", "Beijing", *constraint, "time")
 	fmt.Println(path, cost)
 	// => [Paris P->A Amsterdam A->B Beijing] 15
