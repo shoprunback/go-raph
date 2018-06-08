@@ -58,7 +58,7 @@ func main() {
 	// init customized dijkstra
 	d := NewMyDijkstra(*g)
 
-	constraint := raph.NewConstraint("route")
+	constraint := raph.NewConstraint("place", "route")
 
 	// call customized method
 	path, cost := d.ShortestPath("A", "B", *constraint, "cost")

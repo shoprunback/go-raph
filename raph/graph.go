@@ -65,17 +65,17 @@ func (g Graph) GetNeighbors(vertex string, constraint Constraint) map[string]boo
 	neighbors := map[string]bool{}
 
 	// retrieve outgoing edges with label
-	edges := g.GetConnections(vertex, constraint.Label)
+	edges := g.GetConnections(vertex, constraint.Edge.Label)
 
 	for _, edge := range edges {
 		// assert that edge satifies constraint
-		if g.Edges[edge].Satisfies(constraint) {
+		if g.Edges[edge].Satisfies(*constraint.Edge) {
 			// retrieve edge ends
-			vertices := g.GetConnections(edge, constraint.Label)
+			vertices := g.GetConnections(edge, constraint.Edge.Label)
 
 			for _, neighbor := range vertices {
 				// assert that vertex satifies constraint
-				if g.Vertices[neighbor].Satisfies(constraint) {
+				if g.Vertices[neighbor].Satisfies(*constraint.Vertex) {
 					// add vertex to neighbors
 					neighbors[neighbor] = true
 				}
@@ -92,20 +92,20 @@ func (g Graph) GetNeighborsWithCostsAndEdges(vertex string, constraint Constrain
 	crossedEdges := map[string]string{}
 
 	// retrieve outgoing edges with label
-	edges := g.GetConnections(vertex, constraint.Label)
+	edges := g.GetConnections(vertex, constraint.Edge.Label)
 
 	for _, e := range edges {
 		edge := g.Edges[e]
 
 		// assert that edge satifies constraint
-		if edge.Satisfies(constraint) {
-			vertices := g.GetConnections(edge.ID, constraint.Label)
+		if edge.Satisfies(*constraint.Edge) {
+			vertices := g.GetConnections(edge.ID, constraint.Edge.Label)
 
 			for _, n := range vertices {
 				neighbor := g.Vertices[n]
 
 				// assert that vertex satifies constraint
-				if neighbor.Satisfies(constraint) {
+				if neighbor.Satisfies(*constraint.Vertex) {
 					// compute potential cost of crossing vertex+edge
 					potentialCost := 0
 					for _, cost := range costs {
