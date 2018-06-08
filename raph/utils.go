@@ -65,3 +65,13 @@ func RandSeq(n int) string {
 	}
 	return string(b)
 }
+
+func ToSlice(aMap map[string]bool) []string {
+	slice := []string{}
+	for el, present := range aMap {
+		if present {
+			slice = append(slice, el)
+		}
+	}
+	return slice
+}

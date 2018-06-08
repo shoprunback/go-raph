@@ -29,21 +29,8 @@ func (e Edge) ToJSON() map[string]interface{} {
 	b, _ := json.Marshal(e)
 	json.Unmarshal(b, &data)
 
-	// convert froms/tos from map to slice
-	froms := []string{}
-	tos := []string{}
-	for id, present := range e.Froms {
-		if present {
-			froms = append(froms, id)
-		}
-	}
-	for id, present := range e.Tos {
-		if present {
-			tos = append(tos, id)
-		}
-	}
-	data["froms"] = froms
-	data["tos"] = tos
+	data["froms"] = ToSlice(e.Froms)
+	data["tos"] = ToSlice(e.Tos)
 
 	return data
 }
