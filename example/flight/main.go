@@ -11,9 +11,9 @@ func main() {
 	g := raph.NewGraph()
 
 	// create vertices
-	A := raph.NewVertex("Paris", "city")
-	B := raph.NewVertex("Amsterdam", "city")
-	C := raph.NewVertex("Beijing", "city")
+	A := raph.NewVertex("Paris")
+	B := raph.NewVertex("Amsterdam")
+	C := raph.NewVertex("Beijing")
 
 	// create edges
 	D := raph.NewEdge("P->B", "flight", "Paris", "Beijing")
@@ -40,33 +40,82 @@ func main() {
 	// init dijkstra
 	d := raph.NewDijkstra(*g)
 
-	var constraint *raph.Constraint
 	var path []string
 	var cost int
+	var queryB []byte
+	var query *raph.Query
 
 	// find shortest path between Paris and Beijing, minimizing time
-	constraint = raph.NewConstraint("city", "flight")
-	path, cost = d.ShortestPath("Paris", "Beijing", *constraint, "time")
+	queryB = []byte(`
+		{
+			"from": "Paris",
+			"to": "Beijing",
+			"constraint": {
+				"label": "flight"
+			},
+			"minimize": ["time"]
+		}
+	`)
+	query = raph.NewQuery(queryB)
+	path, cost = d.ShortestPath(*query)
 	fmt.Println(path, cost)
 	// => [Paris P->B Beijing] 11
 
 	// find shortest path between Paris and Beijing, minimizing price
-	constraint = raph.NewConstraint("city", "flight")
-	path, cost = d.ShortestPath("Paris", "Beijing", *constraint, "price")
+	queryB = []byte(`
+		{
+			"from": "Paris",
+			"to": "Beijing",
+			"constraint": {
+				"label": "flight"
+			},
+			"minimize": ["price"]
+		}
+	`)
+	query = raph.NewQuery(queryB)
+	path, cost = d.ShortestPath(*query)
 	fmt.Println(path, cost)
 	// => [Paris P->A Amsterdam A->B Beijing] 400
 
 	// find shortest path between Paris and Beijing accepting M or L luggages, minimizing time
-	constraint = raph.NewConstraint("city", "flight")
-	constraint.Edge.AddProp("maxLuggageSize", "M", "L")
-	path, cost = d.ShortestPath("Paris", "Beijing", *constraint, "time")
+	queryB = []byte(`
+		{
+			"from": "Paris",
+			"to": "Beijing",
+			"constraint": {
+				"edge": {
+					"props": {
+						"maxLuggageSize": ["M", "L"]
+					}
+				},
+				"label": "flight"
+			},
+			"minimize": ["time"]
+		}
+	`)
+	query = raph.NewQuery(queryB)
+	path, cost = d.ShortestPath(*query)
 	fmt.Println(path, cost)
 	// => [Paris P->A Amsterdam A->B Beijing] 15
 
 	// find shortest path between Paris and Beijing, avoiding flights shorter than 10 hours, minimizing price
-	constraint = raph.NewConstraint("city", "flight")
-	constraint.Edge.SetCost("time", 10)
-	path, cost = d.ShortestPath("Paris", "Beijing", *constraint, "price")
+	queryB = []byte(`
+		{
+			"from": "Paris",
+			"to": "Beijing",
+			"constraint": {
+				"edge": {
+					"costs": {
+						"time": 10
+					}
+				},
+				"label": "flight"
+			},
+			"minimize": ["price"]
+		}
+	`)
+	query = raph.NewQuery(queryB)
+	path, cost = d.ShortestPath(*query)
 	fmt.Println(path, cost)
 	// => [Paris P->B Beijing] 500
 }

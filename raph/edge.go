@@ -7,6 +7,7 @@ import (
 // Edge represents an edge instance. It inherits from Vertex structure. Froms & Tos fields are removed from JSON Marshaling to be added manually as slices (cf ToJSON).
 type Edge struct {
 	Vertex
+	Label string          `json:"label"`
 	Froms map[string]bool `json:"-"` // list of vertices from which the edge is reachable
 	Tos   map[string]bool `json:"-"` // list of vertices that the edge can reach
 }
@@ -20,7 +21,7 @@ func NewEdge(id, label, from, to string) *Edge {
 
 // NewMultiEdge returns a new multiedge.
 func NewMultiEdge(id, label string, froms, tos map[string]bool) *Edge {
-	return &Edge{*NewVertex(id, label), froms, tos}
+	return &Edge{*NewVertex(id), label, froms, tos}
 }
 
 // ToJSON formats the vertex to JSON. Froms and Tos fields are converted to slice.

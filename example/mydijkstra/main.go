@@ -47,8 +47,8 @@ func (d *MyDijkstra) ShortestPath(from, to string, constraint raph.Constraint, m
 func main() {
 	// create & populate graph
 	g := raph.NewGraph()
-	A := raph.NewVertex("A", "place")
-	B := raph.NewVertex("B", "place")
+	A := raph.NewVertex("A")
+	B := raph.NewVertex("B")
 	C := raph.NewEdge("C", "route", "A", "B")
 	C.SetCost("cost", 1)
 	g.AddVertex(A)
@@ -58,7 +58,7 @@ func main() {
 	// init customized dijkstra
 	d := NewMyDijkstra(*g)
 
-	constraint := raph.NewConstraint("place", "route")
+	constraint := raph.NewConstraint("route")
 
 	// call customized method
 	path, cost := d.ShortestPath("A", "B", *constraint, "cost")

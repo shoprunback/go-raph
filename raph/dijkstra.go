@@ -80,23 +80,23 @@ func (d *Dijkstra) UpdateDistances(s1, s2, edge string, s1s2Weight int) {
 }
 
 // ShortestPathDetailed returns detailed shortest path with its cost. The value minimized is the sum of specified costs (minimize slice).
-func (d *Dijkstra) ShortestPathDetailed(from, to string, constraint Constraint, minimize ...string) ([]map[string]interface{}, int) {
-	path, cost := d.ShortestPath(from, to, constraint, minimize...)
+func (d *Dijkstra) ShortestPathDetailed(query Query) ([]map[string]interface{}, int) {
+	path, cost := d.ShortestPath(query)
 	detailedPath := GetDetailedPath(path, d.G)
 	return detailedPath, cost
 }
 
 // ShortestPath returns a slice of ids with its cost. The value minimized is the sum of specified costs (minimize slice).
-func (d *Dijkstra) ShortestPath(from, to string, constraint Constraint, minimize ...string) ([]string, int) {
+func (d *Dijkstra) ShortestPath(query Query) ([]string, int) {
 	d.Reset()
 
 	// init dijkstra with distance 0 for first vertex
-	d.Costs[from] = 0
+	d.Costs[query.From] = 0
 
 	// run dijkstra until queue is empty
 	for len(d.Q) > 0 {
 		s1 := d.PickVertexFromQ()
-		neighbors, edges := d.G.GetNeighborsWithCostsAndEdges(s1, constraint, minimize...)
+		neighbors, edges := d.G.GetNeighborsWithCostsAndEdges(s1, *query.Constraint, query.Minimize...)
 		for s2, cost := range neighbors {
 			edge := edges[s2]
 			d.UpdateDistances(s1, s2, edge, cost)
@@ -104,9 +104,9 @@ func (d *Dijkstra) ShortestPath(from, to string, constraint Constraint, minimize
 	}
 
 	// arrange return variables
-	path := GetPath(from, to, d.PredsV, d.PredsE)
-	cost := d.GetCost(to)
-	if from == to {
+	path := GetPath(query.From, query.To, d.PredsV, d.PredsE)
+	cost := d.GetCost(query.To)
+	if query.From == query.To {
 		cost = 0
 	} else if len(path) == 0 || cost == MaxCost {
 		cost = -1

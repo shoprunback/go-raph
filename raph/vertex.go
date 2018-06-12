@@ -11,8 +11,8 @@ type Vertex struct {
 }
 
 // NewVertex returns a new vertex.
-func NewVertex(id, label string) *Vertex {
-	return &Vertex{id, *NewComponent(label)}
+func NewVertex(id string) *Vertex {
+	return &Vertex{id, *NewComponent()}
 }
 
 // ToJSON formats the vertex to JSON.

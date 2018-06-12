@@ -6,14 +6,13 @@ import (
 
 // GetPath returns the path as a slice of strings.
 func GetPath(from, to string, predsV, predsE map[string]string) []string {
-	path := []string{}
-
 	// return empty path if to does not exist
 	if _, ok := predsV[to]; !ok {
-		return path
+		return []string{}
 	}
 
 	// gather
+	path := []string{}
 	current := to
 	ok := true
 	for ok {

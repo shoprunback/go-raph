@@ -65,13 +65,13 @@ func (g Graph) GetNeighbors(vertex string, constraint Constraint) map[string]boo
 	neighbors := map[string]bool{}
 
 	// retrieve outgoing edges with label
-	edges := g.GetConnections(vertex, constraint.Edge.Label)
+	edges := g.GetConnections(vertex, constraint.Label)
 
 	for _, edge := range edges {
 		// assert that edge satifies constraint
 		if g.Edges[edge].Satisfies(*constraint.Edge) {
 			// retrieve edge ends
-			vertices := g.GetConnections(edge, constraint.Edge.Label)
+			vertices := g.GetConnections(edge, constraint.Label)
 
 			for _, neighbor := range vertices {
 				// assert that vertex satifies constraint
@@ -87,19 +87,19 @@ func (g Graph) GetNeighbors(vertex string, constraint Constraint) map[string]boo
 }
 
 // GetNeighborsWithCostsAndEdges returns reachable vertices. For each neighbor, it returns with the minimal cost and the crossed edge (in the case of multiedges).
-func (g Graph) GetNeighborsWithCostsAndEdges(vertex string, constraint Constraint, costs ...string) (map[string]int, map[string]string) {
+func (g Graph) GetNeighborsWithCostsAndEdges(vertex string, constraint Constraint, minimize ...string) (map[string]int, map[string]string) {
 	weights := map[string]int{}
 	crossedEdges := map[string]string{}
 
 	// retrieve outgoing edges with label
-	edges := g.GetConnections(vertex, constraint.Edge.Label)
+	edges := g.GetConnections(vertex, constraint.Label)
 
 	for _, e := range edges {
 		edge := g.Edges[e]
 
 		// assert that edge satifies constraint
 		if edge.Satisfies(*constraint.Edge) {
-			vertices := g.GetConnections(edge.ID, constraint.Edge.Label)
+			vertices := g.GetConnections(edge.ID, constraint.Label)
 
 			for _, n := range vertices {
 				neighbor := g.Vertices[n]
@@ -108,7 +108,7 @@ func (g Graph) GetNeighborsWithCostsAndEdges(vertex string, constraint Constrain
 				if neighbor.Satisfies(*constraint.Vertex) {
 					// compute potential cost of crossing vertex+edge
 					potentialCost := 0
-					for _, cost := range costs {
+					for _, cost := range minimize {
 						potentialCost += edge.Costs[cost] + neighbor.Costs[cost]
 					}
 
