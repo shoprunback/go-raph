@@ -1,10 +1,10 @@
 package raph
 
 import (
-	"encoding/json"
+    "encoding/json"
 )
 
-// Edge represents an edge instance. It inherits from Vertex structure. Froms & Tos fields are removed from JSON Marshaling to be added manually as slices (cf ToJSON).
+// Edge represents an edge instance. It inherits from Vertex structure. Froms & Tos fields are removed from JSON Marshaling.
 type Edge struct {
 	Vertex
 	Label string          `json:"label"`
@@ -24,14 +24,10 @@ func NewMultiEdge(id, label string, froms, tos map[string]bool) *Edge {
 	return &Edge{*NewVertex(id), label, froms, tos}
 }
 
-// ToJSON formats the vertex to JSON. Froms and Tos fields are converted to slice.
+// ToJSON formats the edge to JSON.
 func (e Edge) ToJSON() map[string]interface{} {
 	var data map[string]interface{}
 	b, _ := json.Marshal(e)
 	json.Unmarshal(b, &data)
-
-	data["froms"] = ToSlice(e.Froms)
-	data["tos"] = ToSlice(e.Tos)
-
 	return data
 }
