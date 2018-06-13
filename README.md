@@ -107,7 +107,7 @@ g.AddEdge(F)
 
 You can compute shortest paths with a `Query` instance. If no path exists, `cost` will be `-1`.
 
-Queries are expressed in JSON format:
+Queries are expressed in JSON format
 - `from` origin vertex ID
 - `to` destination vertex ID
 - `constraint`
