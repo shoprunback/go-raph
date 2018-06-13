@@ -13,6 +13,7 @@ func main() {
 	// create vertices
 	A := raph.NewVertex("Paris")
 	B := raph.NewVertex("Amsterdam")
+	B.SetCost("chewam", 10)
 	C := raph.NewVertex("Beijing")
 
 	// create edges
@@ -37,32 +38,29 @@ func main() {
 	g.AddEdge(E)
 	g.AddEdge(F)
 
-	// init dijkstra
-	d := raph.NewDijkstra(*g)
-
-	var path []string
-	var cost int
-	var queryB []byte
 	var query *raph.Query
+	var res map[string]interface{}
+	var ids []string
 
 	// find shortest path between Paris and Beijing, minimizing time
-	queryB = []byte(`
+	query = raph.NewQuery(`
 		{
 			"from": "Paris",
 			"to": "Beijing",
 			"constraint": {
 				"label": "flight"
 			},
-			"minimize": ["time"]
+			"minimize": ["time"],
+			"option": "chewam"
 		}
 	`)
-	query = raph.NewQuery(queryB)
-	path, cost = d.ShortestPath(*query)
-	fmt.Println(path, cost)
+	res = query.Run(*g)
+	ids = ExtractIDS(res["path"].([]map[string]interface{}))
+	fmt.Println(ids, res["cost"])
 	// => [Paris P->B Beijing] 11
 
 	// find shortest path between Paris and Beijing, minimizing price
-	queryB = []byte(`
+	query = raph.NewQuery(`
 		{
 			"from": "Paris",
 			"to": "Beijing",
@@ -72,13 +70,13 @@ func main() {
 			"minimize": ["price"]
 		}
 	`)
-	query = raph.NewQuery(queryB)
-	path, cost = d.ShortestPath(*query)
-	fmt.Println(path, cost)
+	res = query.Run(*g)
+	ids = ExtractIDS(res["path"].([]map[string]interface{}))
+	fmt.Println(ids, res["cost"])
 	// => [Paris P->A Amsterdam A->B Beijing] 400
 
 	// find shortest path between Paris and Beijing accepting M or L luggages, minimizing time
-	queryB = []byte(`
+	query = raph.NewQuery(`
 		{
 			"from": "Paris",
 			"to": "Beijing",
@@ -93,13 +91,13 @@ func main() {
 			"minimize": ["time"]
 		}
 	`)
-	query = raph.NewQuery(queryB)
-	path, cost = d.ShortestPath(*query)
-	fmt.Println(path, cost)
+	res = query.Run(*g)
+	ids = ExtractIDS(res["path"].([]map[string]interface{}))
+	fmt.Println(ids, res["cost"])
 	// => [Paris P->A Amsterdam A->B Beijing] 15
 
 	// find shortest path between Paris and Beijing, avoiding flights shorter than 10 hours, minimizing price
-	queryB = []byte(`
+	query = raph.NewQuery(`
 		{
 			"from": "Paris",
 			"to": "Beijing",
@@ -114,8 +112,16 @@ func main() {
 			"minimize": ["price"]
 		}
 	`)
-	query = raph.NewQuery(queryB)
-	path, cost = d.ShortestPath(*query)
-	fmt.Println(path, cost)
+	res = query.Run(*g)
+	ids = ExtractIDS(res["path"].([]map[string]interface{}))
+	fmt.Println(ids, res["cost"])
 	// => [Paris P->B Beijing] 500
+}
+
+func ExtractIDS(path []map[string]interface{}) []string {
+    ids := []string{}
+    for _, v := range path {
+        ids = append(ids, v["id"].(string))
+    }
+    return ids
 }

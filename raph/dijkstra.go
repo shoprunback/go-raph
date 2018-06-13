@@ -79,17 +79,9 @@ func (d *Dijkstra) UpdateDistances(s1, s2, edge string, s1s2Weight int) {
 	}
 }
 
-// ShortestPathDetailed returns detailed shortest path with its cost. The value minimized is the sum of specified costs (minimize slice).
-func (d *Dijkstra) ShortestPathDetailed(query Query) ([]map[string]interface{}, int) {
-	path, cost := d.ShortestPath(query)
-	detailedPath := GetDetailedPath(path, d.G)
-	return detailedPath, cost
-}
-
 // ShortestPath returns a slice of ids with its cost. The value minimized is the sum of specified costs (minimize slice).
-func (d *Dijkstra) ShortestPath(query Query) ([]string, int) {
+func (d *Dijkstra) ShortestPath(query Query) ([]map[string]interface{}, int) {
 	d.Reset()
-
 	// init dijkstra with distance 0 for first vertex
 	d.Costs[query.From] = 0
 
@@ -105,12 +97,54 @@ func (d *Dijkstra) ShortestPath(query Query) ([]string, int) {
 
 	// arrange return variables
 	path := GetPath(query.From, query.To, d.PredsV, d.PredsE)
+	detailedPath := GetDetailedPath(path, d.G)
 	cost := d.GetCost(query.To)
-	if query.From == query.To {
-		cost = 0
-	} else if len(path) == 0 || cost == MaxCost {
-		cost = -1
+
+	return detailedPath, cost
+}
+
+// ShortestPath returns a slice of ids with its cost. The value minimized is the sum of specified costs (minimize slice).
+func (d *Dijkstra) ShortestPathInverse(query Query) ([]map[string]interface{}, int) {
+	tmp := query.From
+	query.From = query.To
+	query.To = tmp
+	query.Constraint.Label = "~"+query.Constraint.Label
+	return d.ShortestPath(query)
+}
+
+func (d *Dijkstra) ShortestPathOption(query Query) ([]map[string]interface{}, int) {
+	// compute bi-directional shortest path
+	d.ShortestPath(query)
+	fromCosts, fromPredsV, fromPredsE := d.Costs, d.PredsV, d.PredsE
+	d.ShortestPathInverse(query)
+	toCosts, toPredsV, toPredsE := d.Costs, d.PredsV, d.PredsE
+
+	// select best vertex
+	cost := MaxInt
+	minVertex := "none"
+	for vertexID, vertex := range d.G.Vertices {
+		if vertexCost, ok := vertex.Costs[query.Option]; ok {
+			pathCost := fromCosts[vertexID] + toCosts[vertexID]
+			if pathCost > 0 && pathCost < cost {
+				cost = pathCost + vertexCost
+				minVertex = vertexID
+			}
+		}
 	}
 
-	return path, cost
+	// gather paths from->vertex & vertex->to
+	path1 := GetPath(query.From, minVertex, fromPredsV, fromPredsE)
+	path2 := GetPath(query.To, minVertex, toPredsV, toPredsE)
+	Reverse(path2)
+	path := Concat(path1, path2)
+	detailedPath := GetDetailedPath(path, d.G)
+
+	// arrange return variables
+	for _, vertex := range detailedPath {
+		if vertex["id"] == minVertex {
+			vertex["option"] = query.Option
+		}
+	}
+
+	return detailedPath, cost
 }
