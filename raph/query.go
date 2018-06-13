@@ -23,19 +23,19 @@ func NewQuery(queryString string) *Query {
 }
 
 func (q Query) Run(graph Graph) map[string]interface{} {
-    var path []map[string]interface{}
-    var cost int
-    dijkstra := NewDijkstra(graph)
+	var path []map[string]interface{}
+	var cost int
+	dijkstra := NewDijkstra(graph)
 
-    if q.Option == "" {
-        path, cost = dijkstra.ShortestPath(q)
-    } else {
-        path, cost = dijkstra.ShortestPathOption(q)
-    }
+	if q.Option == "" {
+		path, cost = dijkstra.ShortestPath(q)
+	} else {
+		path, cost = dijkstra.ShortestPathOption(q)
+	}
 
-    if cost == MaxCost {
-        cost = -1
-    }
+	if cost == MaxCost {
+		cost = -1
+	}
 
-    return map[string]interface{}{ "path": path, "cost": cost }
+	return map[string]interface{}{"path": path, "cost": cost}
 }

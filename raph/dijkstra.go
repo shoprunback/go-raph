@@ -108,7 +108,7 @@ func (d *Dijkstra) ShortestPathInverse(query Query) ([]map[string]interface{}, i
 	tmp := query.From
 	query.From = query.To
 	query.To = tmp
-	query.Constraint.Label = "~"+query.Constraint.Label
+	query.Constraint.Label = "~" + query.Constraint.Label
 	return d.ShortestPath(query)
 }
 

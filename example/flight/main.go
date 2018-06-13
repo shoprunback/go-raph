@@ -119,9 +119,9 @@ func main() {
 }
 
 func ExtractIDS(path []map[string]interface{}) []string {
-    ids := []string{}
-    for _, v := range path {
-        ids = append(ids, v["id"].(string))
-    }
-    return ids
+	ids := []string{}
+	for _, v := range path {
+		ids = append(ids, v["id"].(string))
+	}
+	return ids
 }
