@@ -47,8 +47,8 @@ func (d *MyDijkstra) ShortestPath(from, to string, constraint raph.Constraint, m
 func main() {
 	// create & populate graph
 	g := raph.NewGraph()
-	A := raph.NewVertex("A")
-	B := raph.NewVertex("B")
+	A := raph.NewVertex("A", "place")
+	B := raph.NewVertex("B", "place")
 	C := raph.NewEdge("C", "route", "A", "B")
 	C.SetCost("cost", 1)
 	g.AddVertex(A)
