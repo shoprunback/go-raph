@@ -5,6 +5,7 @@ import (
 	"log"
 )
 
+// Query represents a shortest path query. Option is an optional vertex cost that should be included in the shortest path.
 type Query struct {
 	From       string      `json:"from"`
 	To         string      `json:"to"`
@@ -13,6 +14,7 @@ type Query struct {
 	Option     string      `json:"option"`
 }
 
+// NewQuery returns a query instance representing the specified JSON string.
 func NewQuery(queryString string) *Query {
 	query := Query{Constraint: &Constraint{Vertex: &Component{}, Edge: &Component{}}}
 	err := json.Unmarshal([]byte(queryString), &query)
@@ -22,6 +24,7 @@ func NewQuery(queryString string) *Query {
 	return &query
 }
 
+// Run executes and returns the query on the specified graph.
 func (q Query) Run(graph Graph) map[string]interface{} {
 	var path []map[string]interface{}
 	var cost int

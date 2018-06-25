@@ -16,6 +16,7 @@ const (
 	MaxCost = MaxInt
 )
 
+// NewDijkstra initializes and returns a Dijkstra instance with graph g.
 func NewDijkstra(g Graph) *Dijkstra {
 	vertices := g.Vertices
 
@@ -103,7 +104,7 @@ func (d *Dijkstra) ShortestPath(query Query) ([]map[string]interface{}, int) {
 	return detailedPath, cost
 }
 
-// ShortestPath returns a slice of ids with its cost. The value minimized is the sum of specified costs (minimize slice).
+// ShortestPathInverse returns the inverted shortest path (to -> from) defined in the query. It is used to compute ShortestPathOption.
 func (d *Dijkstra) ShortestPathInverse(query Query) ([]map[string]interface{}, int) {
 	tmp := query.From
 	query.From = query.To
@@ -112,6 +113,7 @@ func (d *Dijkstra) ShortestPathInverse(query Query) ([]map[string]interface{}, i
 	return d.ShortestPath(query)
 }
 
+// ShortestPathOption returns a path (slice of nodes) with its cost. One of the vertices of the path includes the option specified in the query.
 func (d *Dijkstra) ShortestPathOption(query Query) ([]map[string]interface{}, int) {
 	// compute bi-directional shortest path
 	d.ShortestPath(query)

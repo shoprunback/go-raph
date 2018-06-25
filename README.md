@@ -76,9 +76,9 @@ You can add vertices and edges to a `Graph` instance.
 g := raph.NewGraph()
 
 // create vertices
-A := raph.NewVertex("Paris")
-B := raph.NewVertex("Amsterdam")
-C := raph.NewVertex("Beijing")
+A := raph.NewVertex("Paris", "city")
+B := raph.NewVertex("Amsterdam", "city")
+C := raph.NewVertex("Beijing", "city")
 
 // create edges
 D := raph.NewEdge("P->B", "flight", "Paris", "Beijing")
@@ -115,6 +115,7 @@ Queries are expressed in JSON format
     - `edge` constraint over vertex props/costs
     - `label` edge label to go through
 - `minimize` array of costs to minimize (vertices & edges)
+- `option` (optional string) the shortest path returned should include at least 1 vertex with a cost key equal to the option specified. The cost of the option will be added to the shortest path global cost.
 
 ```go
 query = raph.NewQuery(`
@@ -142,9 +143,9 @@ If a vertex/edge does not contain the property specified by the constraint, it w
 
 If a vertex/edge does not contain the cost to minimize, passing though it will cost `0`.
 
-Cost acts like a threshold.
+Cost constraints acts like a threshold.
 
-If `minimize` is set to `["price", "price", "time"]` the equation `2 * price + time` will be minimized.
+If `minimize` is set to `["price", "price", "time"]` the cost of `2 * price + time` will be minimized by the shortest path algorithm.
 
 Find more examples [here](example/flight/main.go).
 

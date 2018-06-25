@@ -56,7 +56,7 @@ func GetDetailedPath(path []string, g Graph) []map[string]interface{} {
 	for _, componentID := range path {
 		if vertex, ok := g.Vertices[componentID]; ok {
 			detailedPath = append(detailedPath, vertex.ToJSON())
-		} else if edge, ok := g.Edges[componentID]; ok  {
+		} else if edge, ok := g.Edges[componentID]; ok {
 			detailedPath = append(detailedPath, edge.ToJSON())
 		}
 	}

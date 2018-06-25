@@ -6,12 +6,12 @@ import (
 
 // Vertex represents a vertex instance.
 type Vertex struct {
-	ID string `json:"id"`
-	Label string          `json:"label"`
+	ID    string `json:"id"`
+	Label string `json:"label"`
 	Component
 }
 
-// NewVertex returns a new vertex.
+// NewVertex returns a new vertex with specified id and label.
 func NewVertex(id, label string) *Vertex {
 	return &Vertex{id, label, *NewComponent()}
 }
