@@ -1,5 +1,9 @@
 package raph
 
+import (
+	"strings"
+)
+
 // Component represents an instance that can have properties and costs.
 type Component struct {
 	Props map[string][]string `json:"props"`
@@ -37,13 +41,20 @@ func (c Component) Copy() *Component {
 func (c Component) Satisfies(component Component) bool {
 	// check props
 	for prop, satisfyingValues := range component.Props {
+		negation := false
+		if strings.HasPrefix(prop, "~") {
+			prop = prop[1:]
+			negation = true
+		}
+
 		// retrieve property values of component
 		values, ok := c.Props[prop]
 
 		// considered satisfied if property does not exist
 		if ok {
-			// intersection of values and satisfying values should not be empty
-			if !ContainsOne(values, satisfyingValues) {
+			// if !negation intersection of values and satisfying values should not be empty
+			// if negation, intersection of values and satisfying values should be empty
+			if (!negation && !ContainsOne(values, satisfyingValues)) || (negation && ContainsOne(values, satisfyingValues)) {
 				return false
 			}
 		}
