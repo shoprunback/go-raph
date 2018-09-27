@@ -17,15 +17,15 @@ func main() {
 
 	// create edges
 	D := raph.NewEdge("P->B", "flight", "Paris", "Beijing")
-	D.AddProp("maxLuggageSize", "S")
+	D.AddProp("luggageSize", "S")
 	D.SetCost("price", 500)
 	D.SetCost("time", 11)
 	E := raph.NewEdge("P->A", "flight", "Paris", "Amsterdam")
-	E.AddProp("maxLuggageSize", "L")
+	E.AddProp("luggageSize", "L")
 	E.SetCost("price", 100)
 	E.SetCost("time", 5)
 	F := raph.NewEdge("A->B", "flight", "Amsterdam", "Beijing")
-	F.AddProp("maxLuggageSize", "L")
+	F.AddProp("luggageSize", "L")
 	F.SetCost("price", 300)
 	F.SetCost("time", 10)
 
@@ -37,36 +37,89 @@ func main() {
 	g.AddEdge(E)
 	g.AddEdge(F)
 
-	// init dijkstra
-	d := raph.NewDijkstra(*g)
-
-	var constraint *raph.Constraint
-	var path []string
-	var cost int
+	var query *raph.Query
+	var res map[string]interface{}
+	var ids []string
 
 	// find shortest path between Paris and Beijing, minimizing time
-	constraint = raph.NewConstraint("flight")
-	path, cost = d.ShortestPath("Paris", "Beijing", *constraint, "time")
-	fmt.Println(path, cost)
+	query = raph.NewQuery(`
+		{
+			"from": "Paris",
+			"to": "Beijing",
+			"constraint": {
+				"label": "flight"
+			},
+			"minimize": ["time"]
+		}
+	`)
+	res = query.Run(*g)
+	ids = ExtractIDS(res["path"].([]map[string]interface{}))
+	fmt.Println(ids, res["cost"])
 	// => [Paris P->B Beijing] 11
 
 	// find shortest path between Paris and Beijing, minimizing price
-	constraint = raph.NewConstraint("flight")
-	path, cost = d.ShortestPath("Paris", "Beijing", *constraint, "price")
-	fmt.Println(path, cost)
+	query = raph.NewQuery(`
+		{
+			"from": "Paris",
+			"to": "Beijing",
+			"constraint": {
+				"label": "flight"
+			},
+			"minimize": ["price"]
+		}
+	`)
+	res = query.Run(*g)
+	ids = ExtractIDS(res["path"].([]map[string]interface{}))
+	fmt.Println(ids, res["cost"])
 	// => [Paris P->A Amsterdam A->B Beijing] 400
 
 	// find shortest path between Paris and Beijing accepting M or L luggages, minimizing time
-	constraint = raph.NewConstraint("flight")
-	constraint.AddProp("maxLuggageSize", "M", "L")
-	path, cost = d.ShortestPath("Paris", "Beijing", *constraint, "time")
-	fmt.Println(path, cost)
+	query = raph.NewQuery(`
+		{
+			"from": "Paris",
+			"to": "Beijing",
+			"constraint": {
+				"edge": {
+					"props": {
+						"luggageSize": ["M", "L"]
+					}
+				},
+				"label": "flight"
+			},
+			"minimize": ["time"]
+		}
+	`)
+	res = query.Run(*g)
+	ids = ExtractIDS(res["path"].([]map[string]interface{}))
+	fmt.Println(ids, res["cost"])
 	// => [Paris P->A Amsterdam A->B Beijing] 15
 
 	// find shortest path between Paris and Beijing, avoiding flights shorter than 10 hours, minimizing price
-	constraint = raph.NewConstraint("flight")
-	constraint.SetCost("time", 10)
-	path, cost = d.ShortestPath("Paris", "Beijing", *constraint, "price")
-	fmt.Println(path, cost)
+	query = raph.NewQuery(`
+		{
+			"from": "Paris",
+			"to": "Beijing",
+			"constraint": {
+				"edge": {
+					"costs": {
+						"time": 10
+					}
+				},
+				"label": "flight"
+			},
+			"minimize": ["price"]
+		}
+	`)
+	res = query.Run(*g)
+	ids = ExtractIDS(res["path"].([]map[string]interface{}))
+	fmt.Println(ids, res["cost"])
 	// => [Paris P->B Beijing] 500
+}
+
+func ExtractIDS(path []map[string]interface{}) []string {
+	ids := []string{}
+	for _, v := range path {
+		ids = append(ids, v["id"].(string))
+	}
+	return ids
 }

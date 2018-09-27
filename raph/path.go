@@ -6,14 +6,13 @@ import (
 
 // GetPath returns the path as a slice of strings.
 func GetPath(from, to string, predsV, predsE map[string]string) []string {
-	path := []string{}
-
 	// return empty path if to does not exist
 	if _, ok := predsV[to]; !ok {
-		return path
+		return []string{}
 	}
 
 	// gather
+	path := []string{}
 	current := to
 	ok := true
 	for ok {
@@ -54,17 +53,12 @@ func Concat(path, path2 []string) []string {
 // GetDetailedPath returns a slice of objects corresponding to specified slice of ids. Path should alternate between vertices & edges.
 func GetDetailedPath(path []string, g Graph) []map[string]interface{} {
 	detailedPath := []map[string]interface{}{}
-	for i := 0; i < len(path)/2; i++ {
-		placeID := path[2*i]
-		routeID := path[2*i+1]
-		place := g.Vertices[placeID].ToJSON()
-		route := g.Edges[routeID].ToJSON()
-		detailedPath = append(detailedPath, place, route)
-	}
-	if len(path) > 0 {
-		lastPlaceID := path[len(path)-1]
-		lastPlace := g.Vertices[lastPlaceID].ToJSON()
-		detailedPath = append(detailedPath, lastPlace)
+	for _, componentID := range path {
+		if vertex, ok := g.Vertices[componentID]; ok {
+			detailedPath = append(detailedPath, vertex.ToJSON())
+		} else if edge, ok := g.Edges[componentID]; ok {
+			detailedPath = append(detailedPath, edge.ToJSON())
+		}
 	}
 	return detailedPath
 }

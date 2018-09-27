@@ -32,7 +32,7 @@ func NewEdge(id, label, from, to string) *Edge {}
 func NewMultiEdge(id, label string, froms, tos map[string]bool) *Edge {}
 ```
 
-#### Properties & Costs
+#### Properties
 
 Properties are sets of strings. They can be added to vertices and edges.
 
@@ -82,15 +82,15 @@ C := raph.NewVertex("Beijing", "city")
 
 // create edges
 D := raph.NewEdge("P->B", "flight", "Paris", "Beijing")
-D.AddProp("maxLuggageSize", "S")
+D.AddProp("luggageSize", "S")
 D.SetCost("price", 500)
 D.SetCost("time", 11)
 E := raph.NewEdge("P->A", "flight", "Paris", "Amsterdam")
-E.AddProp("maxLuggageSize", "L")
+E.AddProp("luggageSize", "L")
 E.SetCost("price", 100)
 E.SetCost("time", 5)
 F := raph.NewEdge("A->B", "flight", "Amsterdam", "Beijing")
-F.AddProp("maxLuggageSize", "L")
+F.AddProp("luggageSize", "L")
 F.SetCost("price", 300)
 F.SetCost("time", 10)
 
@@ -105,59 +105,50 @@ g.AddEdge(F)
 
 ## Shortest path
 
-You can compute shortest paths with a `Dijkstra` instance. If no path exists, `cost` will be `-1`.
+You can compute shortest paths with a `Query` instance. If no path exists, `cost` will be `-1`.
 
-`Constraint` objects let you customize path traversals to fit your needs.
-
-To filter out nodes and edges, simply use:
-- `Constraint.AddProp(prop, value string)` The node/edge will be filtered out if there is no intersection between the props of the vertex/edge and the props of the constraint. If a vertex/edge does not have the property specified by the constraint, it will not be filtered out.
-
-- `Constraint.SetCost(prop string, value int)` acts like a threshold: will dodge the vertex/edge if the property value is less than specified value. If a vertex/edge does not contain the cost to minimize, passing though it will cost `0`.
-
-#### Prototypes
-
-```go
-func (d *Dijkstra) ShortestPath(from, to string, constraint Constraint, minimize ...string) ([]string, int) // slice of ids
-func (d *Dijkstra) ShortestPathDetailed(from, to string, constraint Constraint, minimize ...string) ([]map[string]interface{}, int) // slice of detailed objects
-```
+Queries are expressed in JSON format
+- `from` origin vertex ID
+- `to` destination vertex ID
+- `constraint`
+    - `vertex` constraint over edge props/costs
+    - `edge` constraint over vertex props/costs
+    - `label` edge label to go through
+- `minimize` array of costs to minimize (vertices & edges)
+- `option` (optional string) the shortest path returned should include at least 1 vertex with a cost key equal to the option specified. The cost of the option will be added to the shortest path global cost.
 
 ```go
-// init dijkstra
-d := raph.NewDijkstra(*g)
-
-var constraint *raph.Constraint
-var path []string
-var cost int
-
-// find shortest path between Paris and Beijing, minimizing time
-constraint = raph.NewConstraint("flight")
-path, cost = d.ShortestPath("Paris", "Beijing", *constraint, "time")
-fmt.Println(path, cost)
-// => [Paris P->B Beijing] 11
-
-// find shortest path between Paris and Beijing, minimizing price
-constraint = raph.NewConstraint("flight")
-path, cost = d.ShortestPath("Paris", "Beijing", *constraint, "price")
-fmt.Println(path, cost)
-// => [Paris P->A Amsterdam A->B Beijing] 400
-
-// find shortest path between Paris and Beijing accepting M or L luggages, minimizing time
-constraint = raph.NewConstraint("flight")
-constraint.AddProp("maxLuggageSize", "M", "L")
-path, cost = d.ShortestPath("Paris", "Beijing", *constraint, "time")
-fmt.Println(path, cost)
-// => [Paris P->A Amsterdam A->B Beijing] 15
-
-// find shortest path between Paris and Beijing, avoiding flights shorter than 10 hours, minimizing price
-constraint = raph.NewConstraint("flight")
-constraint.SetCost("time", 10)
-path, cost = d.ShortestPath("Paris", "Beijing", *constraint, "price")
-fmt.Println(path, cost)
-// => [Paris P->B Beijing] 500
+query = raph.NewQuery(`
+    {
+        "from": "Paris",
+        "to": "Beijing",
+        "constraint": {
+            "edge": {
+                "props": {
+                    "luggageSize": ["M", "L"] // M or L
+                },
+                "costs": {
+                    "time": 10 // at least 10
+                }
+            },
+            "label": "flight"
+        },
+        "minimize": ["price"]
+    }
+`)
+res = query.Run(*g)
 ```
 
-You can minimize more than a single cost by giving a list of costs at the end of **_ShortestPath()_** method. For instance, if you want to minimize **_2 x time + price_**, call `d.ShortestPath("Paris", "Beijing", *constraint, "time", "time", "price")`.
+If a vertex/edge does not contain the property specified by the constraint, it will not be filtered out.
+
+If a vertex/edge does not contain the cost to minimize, passing though it will cost `0`.
+
+Cost constraints acts like a threshold.
+
+If `minimize` is set to `["price", "price", "time"]` the cost of `2 * price + time` will be minimized by the shortest path algorithm.
+
+Find more examples [here](example/flight/main.go).
 
 ### Custom shortest path
 
-You can implement your own `ShortestPath` algorithm would you need further customization. To do so, you need to declare a new _struct_ overriding the original **_ShortestPath()_** method. This [working example](example/mydijkstra/main.go) can help you.
+You can implement your own `ShortestPath` algorithm would you need further customization. To do so, you need to declare a new _struct_ overriding the original **_ShortestPath(q Query)_** method. This [working example](example/mydijkstra/main.go) can help you.

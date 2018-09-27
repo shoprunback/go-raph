@@ -65,3 +65,21 @@ func RandSeq(n int) string {
 	}
 	return string(b)
 }
+
+func ToSlice(aMap map[string]bool) []string {
+	slice := []string{}
+	for el, present := range aMap {
+		if present {
+			slice = append(slice, el)
+		}
+	}
+	return slice
+}
+
+func ExtractIDS(path []map[string]interface{}) []string {
+	ids := []string{}
+	for _, v := range path {
+		ids = append(ids, v["id"].(string))
+	}
+	return ids
+}
