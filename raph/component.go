@@ -41,10 +41,10 @@ func (c Component) Copy() *Component {
 func (c Component) Satisfies(component Component) bool {
 	// check props
 	for prop, satisfyingValues := range component.Props {
-		negation := false
-		if strings.HasPrefix(prop, "~") {
+		// negation is the case where a property should not contain any of satisfying values
+		negation := strings.HasPrefix(prop, "~")
+		if negation {
 			prop = prop[1:]
-			negation = true
 		}
 
 		// retrieve property values of component
@@ -52,7 +52,7 @@ func (c Component) Satisfies(component Component) bool {
 
 		// considered satisfied if property does not exist
 		if ok {
-			// if !negation intersection of values and satisfying values should not be empty
+			// if !negation, intersection of values and satisfying values should not be empty
 			// if negation, intersection of values and satisfying values should be empty
 			if (!negation && !ContainsOne(values, satisfyingValues)) || (negation && ContainsOne(values, satisfyingValues)) {
 				return false
