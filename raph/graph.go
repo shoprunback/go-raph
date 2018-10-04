@@ -1,9 +1,5 @@
 package raph
 
-import (
-	"log"
-)
-
 // Graph represents a graph instance.
 type Graph struct {
 	Vertices    map[string]*Vertex
@@ -32,20 +28,17 @@ func (g *Graph) AddVertex(v *Vertex) {
 func (g *Graph) AddEdge(e *Edge) {
 	g.Edges[e.ID] = e
 	for from := range e.Froms {
-		if !g.hasVertex(from) {
-			log.Fatalln("Tried to connect", e.ID, "to", from, "but", from, "does not exist")
+		if g.hasVertex(from) {
+			g.Connect(from, e.ID, e.Label)
+			g.Connect(e.ID, from, "~"+e.Label) // store inverse relation
 		}
-		g.Connect(from, e.ID, e.Label)
-		// store inverse relation
-		g.Connect(e.ID, from, "~"+e.Label)
+
 	}
 	for to := range e.Tos {
-		if !g.hasVertex(to) {
-			log.Fatalln("Tried to connect", e.ID, "to", to, "but", to, "does not exist")
+		if g.hasVertex(to) {
+			g.Connect(e.ID, to, e.Label)
+			g.Connect(to, e.ID, "~"+e.Label) // store inverse relation
 		}
-		g.Connect(e.ID, to, e.Label)
-		// store inverse relation
-		g.Connect(to, e.ID, "~"+e.Label)
 	}
 }
 
