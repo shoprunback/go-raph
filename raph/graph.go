@@ -80,8 +80,8 @@ func (g Graph) GetNeighbors(vertex string, constraint Constraint) map[string]boo
 }
 
 // GetNeighborsWithCostsAndEdges returns reachable vertices. For each neighbor, it returns with the minimal cost and the crossed edge (in the case of multiedges).
-func (g Graph) GetNeighborsWithCostsAndEdges(vertex string, constraint Constraint, minimize ...string) (map[string]int, map[string]string) {
-	weights := map[string]int{}
+func (g Graph) GetNeighborsWithCostsAndEdges(vertex string, constraint Constraint, minimize ...string) (map[string]float64, map[string]string) {
+	weights := map[string]float64{}
 	crossedEdges := map[string]string{}
 
 	// retrieve outgoing edges with label
@@ -100,7 +100,7 @@ func (g Graph) GetNeighborsWithCostsAndEdges(vertex string, constraint Constrain
 				// assert that vertex satifies constraint
 				if neighbor.Satisfies(*constraint.Vertex) {
 					// compute potential cost of crossing vertex+edge
-					potentialCost := 0
+					potentialCost := 0.0
 					for _, cost := range minimize {
 						potentialCost += edge.Costs[cost] + neighbor.Costs[cost]
 					}
