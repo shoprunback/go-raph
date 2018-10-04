@@ -143,6 +143,8 @@ If a vertex/edge does not contain the property specified by the constraint, it w
 
 If a vertex/edge does not contain the cost to minimize, passing though it will cost `0`.
 
+If you use `~luggageSize` rather than `luggageSize`, edges with the property `luggageSize` containing M or L will be filtered out.
+
 Cost constraints acts like a threshold.
 
 If `minimize` is set to `["price", "price", "time"]` the cost of `2 * price + time` will be minimized by the shortest path algorithm.
