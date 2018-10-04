@@ -7,12 +7,12 @@ import (
 // Component represents an instance that can have properties and costs.
 type Component struct {
 	Props map[string][]string `json:"props"`
-	Costs map[string]int      `json:"costs"`
+	Costs map[string]float64  `json:"costs"`
 }
 
 // NewEdge returns a new component.
 func NewComponent() *Component {
-	return &Component{map[string][]string{}, map[string]int{}}
+	return &Component{map[string][]string{}, map[string]float64{}}
 }
 
 // AddProp adds a property values to the component.
@@ -21,7 +21,7 @@ func (c *Component) AddProp(prop string, values ...string) {
 }
 
 // SetCost sets a cost value for the component.
-func (c *Component) SetCost(cost string, value int) {
+func (c *Component) SetCost(cost string, value float64) {
 	c.Costs[cost] = value
 }
 

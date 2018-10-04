@@ -1,20 +1,17 @@
 package raph
 
+import (
+	"math"
+)
+
 // Dijkstra instance is used to compute Dijkstra algorithm.
 type Dijkstra struct {
 	G      Graph
 	Q      []string
-	Costs  map[string]int
+	Costs  map[string]float64
 	PredsV map[string]string
 	PredsE map[string]string
 }
-
-// Sets MaxCost to MaxInt.
-const (
-	MaxUint = ^uint(0)
-	MaxInt  = int(MaxUint >> 1)
-	MaxCost = MaxInt
-)
 
 // NewDijkstra initializes and returns a Dijkstra instance with graph g.
 func NewDijkstra(g Graph) *Dijkstra {
@@ -26,10 +23,10 @@ func NewDijkstra(g Graph) *Dijkstra {
 		q = append(q, vertex.ID)
 	}
 
-	// initialize all costs at MaxCost
-	costs := map[string]int{}
+	// initialize all costs with +infinity
+	costs := map[string]float64{}
 	for _, vertex := range vertices {
-		costs[vertex.ID] = MaxCost
+		costs[vertex.ID] = math.Inf(0)
 	}
 
 	PredsV := map[string]string{}
@@ -43,22 +40,13 @@ func (d *Dijkstra) Reset() {
 	*d = *NewDijkstra(d.G)
 }
 
-// GetCost returns the cost of speficied vertex. If it has not been set by UpdateDistances yet, it returns MaxCost.
-func (d Dijkstra) GetCost(id string) int {
-	if cost, ok := d.Costs[id]; ok {
-		return cost
-	} else {
-		return MaxCost
-	}
-}
-
 // PickVertexFromQ returns the vertex with minimal cost and removes it from the queue.
 func (d *Dijkstra) PickVertexFromQ() string {
-	min := d.GetCost(d.Q[0])
+	min := d.Costs[d.Q[0]]
 	vertex := d.Q[0]
 	index := 0
 	for i, v := range d.Q {
-		cost := d.GetCost(v)
+		cost := d.Costs[v]
 		if cost < min {
 			min = cost
 			vertex = v
@@ -70,10 +58,10 @@ func (d *Dijkstra) PickVertexFromQ() string {
 }
 
 // UpdateDistances updates the costs of s2 if it is not minimal. It also stores the edge crossed to get that minimal cost.
-func (d *Dijkstra) UpdateDistances(s1, s2, edge string, s1s2Weight int) {
-	cost := d.GetCost(s2)
-	potentialCost := d.GetCost(s1) + s1s2Weight
-	if potentialCost >= 0 && potentialCost < cost {
+func (d *Dijkstra) UpdateDistances(s1, s2, edge string, s1s2Weight float64) {
+	cost := d.Costs[s2]
+	potentialCost := d.Costs[s1] + s1s2Weight
+	if potentialCost < cost {
 		d.Costs[s2] = potentialCost
 		d.PredsV[s2] = s1
 		d.PredsE[s2] = edge
@@ -81,9 +69,9 @@ func (d *Dijkstra) UpdateDistances(s1, s2, edge string, s1s2Weight int) {
 }
 
 // ShortestPath returns a slice of ids with its cost. The value minimized is the sum of specified costs (minimize slice).
-func (d *Dijkstra) ShortestPath(query Query) ([]map[string]interface{}, int) {
+func (d *Dijkstra) ShortestPath(query Query) ([]map[string]interface{}, float64) {
+	// init dijkstra
 	d.Reset()
-	// init dijkstra with distance 0 for first vertex
 	d.Costs[query.From] = 0
 
 	// run dijkstra until queue is empty
@@ -99,13 +87,13 @@ func (d *Dijkstra) ShortestPath(query Query) ([]map[string]interface{}, int) {
 	// arrange return variables
 	path := GetPath(query.From, query.To, d.PredsV, d.PredsE)
 	detailedPath := GetDetailedPath(path, d.G)
-	cost := d.GetCost(query.To)
+	cost := d.Costs[query.To]
 
 	return detailedPath, cost
 }
 
 // ShortestPathInverse returns the inverted shortest path (to -> from) defined in the query. It is used to compute ShortestPathOption.
-func (d *Dijkstra) ShortestPathInverse(query Query) ([]map[string]interface{}, int) {
+func (d *Dijkstra) ShortestPathInverse(query Query) ([]map[string]interface{}, float64) {
 	tmp := query.From
 	query.From = query.To
 	query.To = tmp
@@ -114,7 +102,7 @@ func (d *Dijkstra) ShortestPathInverse(query Query) ([]map[string]interface{}, i
 }
 
 // ShortestPathOption returns a path (slice of nodes) with its cost. One of the vertices of the path includes the option specified in the query.
-func (d *Dijkstra) ShortestPathOption(query Query) ([]map[string]interface{}, int) {
+func (d *Dijkstra) ShortestPathOption(query Query) ([]map[string]interface{}, float64) {
 	// compute bi-directional shortest path
 	d.ShortestPath(query)
 	fromCosts, fromPredsV, fromPredsE := d.Costs, d.PredsV, d.PredsE
@@ -122,7 +110,7 @@ func (d *Dijkstra) ShortestPathOption(query Query) ([]map[string]interface{}, in
 	toCosts, toPredsV, toPredsE := d.Costs, d.PredsV, d.PredsE
 
 	// select best vertex
-	cost := MaxInt
+	cost := math.Inf(0)
 	minVertex := "none"
 	for vertexID, vertex := range d.G.Vertices {
 		if vertexCost, ok := vertex.Costs[query.Option]; ok {
