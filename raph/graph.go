@@ -125,7 +125,9 @@ func (g Graph) GetAccessibleVertices(vertex string, traversalConstraint, selecti
 	accessibleVertices := map[string]bool{}
 
 	// update accessibleVertices with recursive calls
-	g.getAccessibleVerticesRecursive(vertex, traversalConstraint, selectionConstraint, accessibleVertices)
+	if g.hasVertex(vertex) {
+		g.getAccessibleVerticesRecursive(vertex, traversalConstraint, selectionConstraint, accessibleVertices)
+	}
 
 	return accessibleVertices
 }
