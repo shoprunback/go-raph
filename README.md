@@ -125,7 +125,8 @@ query = raph.NewQuery(`
         "constraint": {
             "edge": {
                 "props": {
-                    "luggageSize": ["M", "L"] // M or L
+                    "luggageSize": ["M", "L"] // M or L only
+                    // "~luggageSize": ["M", "L"] exclude M and L
                 },
                 "costs": {
                     "time": 10 // at least 10

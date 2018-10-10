@@ -27,13 +27,14 @@ func (g *Graph) AddVertex(v *Vertex) {
 // Adding an edge connecting vertices that does not exist raises an error.
 func (g *Graph) AddEdge(e *Edge) {
 	g.Edges[e.ID] = e
+
 	for from := range e.Froms {
 		if g.hasVertex(from) {
 			g.Connect(from, e.ID, e.Label)
 			g.Connect(e.ID, from, "~"+e.Label) // store inverse relation
 		}
-
 	}
+
 	for to := range e.Tos {
 		if g.hasVertex(to) {
 			g.Connect(e.ID, to, e.Label)
@@ -118,33 +119,29 @@ func (g Graph) GetNeighborsWithCostsAndEdges(vertex string, constraint Constrain
 	return weights, crossedEdges
 }
 
-// GetAccessibleVertices returns accessible vertices from vertex using private method getAccessibleVerticesRecursive.
-func (g Graph) GetAccessibleVertices(vertex string, constraint Constraint) map[string]bool {
-	// only vertex is accessible at the beginning
-	accessibleVertices := map[string]bool{vertex: true}
+// GetAccessibleVertices returns accessible vertices from vertex using private method getAccessibleVerticesRecursive. selectionConstraint applies only on the Vertex.
+func (g Graph) GetAccessibleVertices(vertex string, traversalConstraint, selectionConstraint Constraint) map[string]bool {
+	// no vertex is accessible at first
+	accessibleVertices := map[string]bool{}
 
-	// retrieve neighbors of vertex
-	neighbors := g.GetNeighbors(vertex, constraint)
-	for neighbor := range neighbors {
-		// pass accessible vertices map to be updated
-		g.getAccessibleVerticesRecursive(neighbor, constraint, accessibleVertices)
-	}
+	// update accessibleVertices with recursive calls
+	g.getAccessibleVerticesRecursive(vertex, traversalConstraint, selectionConstraint, accessibleVertices)
 
 	return accessibleVertices
 }
 
 // getAccessibleVerticesRecursive adds accessible vertices from vertex to accessibleVertices.
-func (g Graph) getAccessibleVerticesRecursive(vertex string, constraint Constraint, accessibleVertices map[string]bool) {
+func (g Graph) getAccessibleVerticesRecursive(vertex string, traversalConstraint, selectionConstraint Constraint, accessibleVertices map[string]bool) {
 	// inform that the vertex is accessible
-	accessibleVertices[vertex] = true
-
-	// retrieve neighbors of vertex
-	neighbors := g.GetNeighbors(vertex, constraint)
+	if g.Vertices[vertex].Satisfies(*selectionConstraint.Vertex) {
+		accessibleVertices[vertex] = true
+	}
 
 	// recursive call on all neighbors if not done yet
+	neighbors := g.GetNeighbors(vertex, traversalConstraint)
 	for neighbor := range neighbors {
 		if _, ok := accessibleVertices[neighbor]; !ok {
-			g.getAccessibleVerticesRecursive(neighbor, constraint, accessibleVertices)
+			g.getAccessibleVerticesRecursive(neighbor, traversalConstraint, selectionConstraint, accessibleVertices)
 		}
 	}
 }
